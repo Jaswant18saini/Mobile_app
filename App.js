@@ -25,7 +25,6 @@ const App = () => {
             pageTransition: 'scrollContinuous',
             scrollDirection: 'vertical',
           }}
-          // ref={ref1}
           fragmentTag="PDF1"
           style={{flex: 1}}
         />
