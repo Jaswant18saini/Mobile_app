@@ -1,35 +1,30 @@
-import React, {Component, useRef} from 'react';
-import {Platform, Button} from 'react-native';
-import PSPDFKitView from 'react-native-pspdfkit';
-import {useState} from 'react/cjs/react.production.min';
+import * as React from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {createStackNavigator} from '@react-navigation/stack';
+import ModalScreen from './Screens/ModalScreen';
+import Home from './Screens/Home';
 
-const DOCUMENT =
-  Platform.OS === 'ios' ? 'Document.pdf' : 'file:///android_asset/Document.pdf';
-const App = () => {
-  const ref1 = useRef();
-  const [openfile, setOpenFile] = useState(false);
+const Stack = createNativeStackNavigator();
+const RootStack = createStackNavigator();
 
+function App() {
   return (
-    <>
-      <Button
-        onPress={setOpenFile(true)}
-        title="Learn More"
-        color="#841584"
-        accessibilityLabel="Learn more about this purple button"
-      />
-      {openfile ? (
-        <PSPDFKitView
-          document={DOCUMENT}
-          configuration={{
-            showThumbnailBar: 'scrollable',
-            pageTransition: 'scrollContinuous',
-            scrollDirection: 'vertical',
-          }}
-          fragmentTag="PDF1"
-          style={{flex: 1}}
-        />
-      ) : null}
-    </>
+    <NavigationContainer>
+      {/* <Stack.Navigator> */}
+
+      <RootStack.Navigator>
+        <RootStack.Screen name="Home" component={Home} />
+        <RootStack.Group screenOptions={{presentation: 'modal'}}>
+          <RootStack.Screen name="MyModal" component={ModalScreen} />
+        </RootStack.Group>
+      </RootStack.Navigator>
+      {/* </Stack.Navigator> */}
+      {/* <Stack.Navigator screenOptions={{presentation: 'modal'}}>
+        <Stack.Screen name="Modal" component={ModalScreen} />
+      </Stack.Navigator> */}
+    </NavigationContainer>
   );
-};
+}
+
 export default App;
