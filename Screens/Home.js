@@ -17,7 +17,7 @@ const Home = () => {
   const netInfo = useNetInfo();
 
   const api = create({
-    baseURL: 'https://e177-180-188-224-155.in.ngrok.io',
+    baseURL: 'http://34.231.129.177',
     headers: {Accept: 'application/json'},
   });
 
