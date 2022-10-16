@@ -95,7 +95,6 @@ const Home = () => {
       toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
     }).promise.then(r => {
       console.log('working', RNFS.DocumentDirectoryPath);
-      // this.setState({ isDone: true })
     });
   };
   console.log('folder', folder);
