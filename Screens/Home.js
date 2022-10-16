@@ -33,26 +33,32 @@ const Home = () => {
     } else {
       callApi();
     }
-  }, [netInfo.type]);
+  }, [netInfo.type, netInfo.isInternetReachable]);
 
   function callApi() {
     api
       .get('/folderfiles/a0B0r00001AXOqkEAH')
       .then(response => response?.data.tree)
-      .then(async data => {
-        setFolder(data);
-        await AsyncStorage.setItem('FolderInfo', JSON.stringify(data));
+      .then(async res => {
+        get(res);
+        // setFolder(data);
+        await AsyncStorage.setItem('FolderInfo', JSON.stringify(res));
       });
   }
 
-  const get = async key => {
+  const get = async (data = null) => {
     RNFS.readDir(RNFS.DocumentDirectoryPath)
       .then(async result => {
         console.log('GOT RESULT', result);
         let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
+        let item = [];
         try {
-          const value = await AsyncStorage.getItem('FolderInfo');
-          const item = JSON.parse(value);
+          if (data) {
+            item = data;
+          } else {
+            const value = await AsyncStorage.getItem('FolderInfo');
+            item = JSON.parse(value);
+          }
           const updatedData = item?.map((val, index) => {
             const filedata = datafromstorage?.find(data =>
               data?.name.includes(val?.Id),
@@ -104,6 +110,7 @@ const Home = () => {
       <ScrollView>
         <View>
           {folder?.map(person => {
+            console.log('person', person);
             return (
               <View key={person.Id}>
                 <Text
@@ -118,8 +125,9 @@ const Home = () => {
                 />
                 <Button
                   disabled={
-                    netInfo.type !== 'unknown' &&
-                    netInfo.isInternetReachable === false
+                    (netInfo.type !== 'unknown' &&
+                      netInfo.isInternetReachable === false) ||
+                    person?.download
                   }
                   title="Download"
                   onPress={() => {
