@@ -34,3 +34,5 @@ Add platform-tools to Path
 6. Click New and add the path to platform-tools to the list.
 
 Default Location %LOCALAPPDATA%\Android\Sdk\platform-tools
+
+react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
