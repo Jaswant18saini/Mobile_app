@@ -1,4 +1,4 @@
-import React, {Component, useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Platform,
@@ -13,7 +13,7 @@ import {create} from 'apisauce';
 import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 
-const Home = () => {
+const Home = ({navigation}) => {
   const netInfo = useNetInfo();
 
   const api = create({
@@ -49,7 +49,6 @@ const Home = () => {
   const get = async (data = null) => {
     RNFS.readDir(RNFS.DocumentDirectoryPath)
       .then(async result => {
-        console.log('GOT RESULT', result);
         let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
         let item = [];
         try {
@@ -63,7 +62,7 @@ const Home = () => {
             const filedata = datafromstorage?.find(data =>
               data?.name.includes(val?.Id),
             );
-            console.log('filedata', filedata);
+
             if (filedata) {
               val['download'] = true;
             } else {
@@ -71,19 +70,17 @@ const Home = () => {
             }
             return val;
           });
-          console.log('updatedData', updatedData);
+
           setFolder(updatedData);
         } catch (err) {
           console.log(err);
         }
-        console.log('data', data);
       })
       .catch(err => {
         console.log(err.message, err.code);
       });
   };
   const handleView = val => {
-    console.log('great!!!');
     const documentNew =
       Platform.OS === 'ios'
         ? 'Document.pdf'
@@ -103,14 +100,12 @@ const Home = () => {
       console.log('working', RNFS.DocumentDirectoryPath);
     });
   };
-  console.log('folder', folder);
 
   return (
     <View>
       <ScrollView>
         <View>
           {folder?.map(person => {
-            console.log('person', person);
             return (
               <View key={person.Id}>
                 <Text
