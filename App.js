@@ -5,12 +5,12 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import Home from './Screens/Home';
-import NewScreen from './Screens/components/Newscreen';
 import Issues from './Screens/components/Issue/Index';
 import Checklists from './Screens/components/CheckLists';
 import Sync from './Screens/components/Sync';
 import DialyLogs from './Screens/components/Dialy-logs';
 import More from './Screens/components/More';
+import Documents from './Screens/components/Documents';
 
 const RootStack = createStackNavigator();
 
@@ -50,7 +50,7 @@ function App() {
             tabBarInactiveTintColor: 'gray',
           })}>
           <Tab.Screen name="Home" component={Home} />
-          <Tab.Screen name="Documents" component={NewScreen} />
+          <Tab.Screen name="Documents" component={Documents} />
           <Tab.Screen name="Issue" component={Issues} />
           <Tab.Screen name="Checklists" component={Checklists} />
           <Tab.Screen name="Sync" component={Sync} />
