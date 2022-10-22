@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Icon} from '@rneui/themed';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   View,
   Text,
@@ -10,9 +10,10 @@ import {
   Image,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
-import PdfThumbnail from 'react-native-pdf-thumbnail';
 import {create} from 'apisauce';
 import Header from './Header';
+import {createThumbnail} from 'react-native-create-thumbnail';
+import {ScrollView} from 'react-native';
 
 const Documents = () => {
   const [parentFolder, setParentFolder] = useState();
@@ -32,16 +33,19 @@ const Documents = () => {
   useEffect(() => {
     Allfolder();
   }, []);
-  console.log('parentFolder', parentFolder);
-  console.log('folderData', folderData);
+  // console.log('parentFolder', parentFolder);
+  // console.log('folderData', folderData);
   console.log('fileData', fileData);
 
   const handleParentFolder = item => {
     setFolderData(item?.children);
 
-    api
-      .get(`/folderfiles/${item?.value?.Id}`)
-      .then(res => setFileData(res?.data?.tree));
+    api.get(`/folderfiles/${item?.value?.Id}`).then(res => {
+      res?.data?.tree?.map(async item => {
+        return (item['thumbnail'] = '');
+      });
+      setFileData(res?.data?.tree);
+    });
   };
 
   const Buttons = ({item}) => {
@@ -63,19 +67,24 @@ const Documents = () => {
         </TouchableOpacity>
         <Text>{item?.value?.Name}</Text>
         <TouchableOpacity onPress={null}>
-          <Icon type="EvilIcons" name="search" color="white" />
+          <Icon type="FontAwesone" name="download" color="grey" />
         </TouchableOpacity>
       </View>
     );
   };
 
-  const FilesView = async ({item}) => {
-    const results = await PdfThumbnail.generateAllPages(item?.url);
-    console.log('results', results);
+  const FilesView = ({item}) => {
+    const data = {
+      image: require('../../../assets/thumbnailDemo.webp'),
+    };
     return (
-      <View>
-        <Text>{item?.Name}</Text>
-      </View>
+      <ScrollView>
+        <View>
+          <Text>{item?.Name}</Text>
+          <Image source={data?.image} style={[{width: 150, height: 150}]} />
+          <Icon type="FontAwesone" name="download" color="grey" />
+        </View>
+      </ScrollView>
     );
   };
 
@@ -107,7 +116,6 @@ const Documents = () => {
             data={fileData}
             renderItem={FilesView}
             keyExtractor={item => item.Id}
-            horizontal
           />
         </View>
       </View>
