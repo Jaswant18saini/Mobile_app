@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {NavigationContainer} from '@react-navigation/native';
-import {createStackNavigator} from '@react-navigation/stack';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
@@ -11,8 +10,6 @@ import Sync from './Screens/components/Sync';
 import DialyLogs from './Screens/components/Dialy-logs';
 import More from './Screens/components/More';
 import Documents from './Screens/components/Documents';
-
-const RootStack = createStackNavigator();
 
 function App() {
   const Tab = createBottomTabNavigator();
@@ -25,28 +22,29 @@ function App() {
               let iconName;
 
               if (route.name === 'Home') {
-                iconName = focused
-                  ? 'ios-information-circle'
-                  : 'ios-information-circle-outline';
+                iconName = focused ? 'ios-home-sharp' : 'ios-home-sharp';
               } else if (route.name === 'Documents') {
-                iconName = focused ? 'ios-list-box' : 'md-copy-outline';
+                iconName = focused ? 'md-document' : 'md-document';
               } else if (route.name === 'Issue') {
-                iconName = focused ? 'ios-list-box' : 'ios-list';
+                iconName = focused ? 'md-warning' : 'md-warning';
               } else if (route.name === 'Checklists') {
-                iconName = focused ? 'ios-list-box' : 'ios-list';
+                iconName = focused ? 'ios-checkbox' : 'ios-checkbox';
               } else if (route.name === 'Sync') {
-                iconName = focused ? 'ios-list-box' : 'ios-list';
+                iconName = focused
+                  ? 'md-sync-circle-sharp'
+                  : 'md-sync-circle-sharp';
               } else if (route.name === 'Daily-logs') {
-                iconName = focused ? 'ios-list-box' : 'ios-list';
+                iconName = focused ? 'md-partly-sunny' : 'md-partly-sunny';
+              } else if (route.name === 'More') {
+                iconName = focused
+                  ? 'md-ellipsis-horizontal-circle-sharp'
+                  : 'md-ellipsis-horizontal-circle-outline';
               }
-              // } else if (route.name === '') {
-              //   iconName = focused ? 'ios-list-box' : 'ios-list';
-              // }
 
               // You can return any component that you like here!
               return <Ionicons name={iconName} size={size} color={color} />;
             },
-            tabBarActiveTintColor: 'tomato',
+            tabBarActiveTintColor: 'dodgerblue',
             tabBarInactiveTintColor: 'gray',
           })}>
           <Tab.Screen name="Home" component={Home} />
@@ -55,7 +53,7 @@ function App() {
           <Tab.Screen name="Checklists" component={Checklists} />
           <Tab.Screen name="Sync" component={Sync} />
           <Tab.Screen name="Daily-logs" component={DialyLogs} />
-          {/* <Tab.Screen name="More" component={More} /> */}
+          <Tab.Screen name="More" component={More} />
         </Tab.Navigator>
       </SafeAreaProvider>
     </NavigationContainer>

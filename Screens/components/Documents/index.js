@@ -42,7 +42,7 @@ const Documents = () => {
 
     api.get(`/folderfiles/${item?.value?.Id}`).then(res => {
       res?.data?.tree?.map(async item => {
-        return (item['thumbnail'] = '');
+        return (item.thumbnail = '');
       });
       setFileData(res?.data?.tree);
     });
