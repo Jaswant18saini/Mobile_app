@@ -41,7 +41,7 @@ const Header = props => {
       }
       centerComponent={
         <>
-          <View style={styles.headerRight}>
+          <View style={{padding: 10, flex: 1, background: 'red'}}>
             <View>
               <Text>Documents</Text>
             </View>
@@ -59,13 +59,13 @@ const styles = StyleSheet.create({
   headerContainer: {
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#397af8',
+    background: '#fff',
     marginBottom: 20,
     width: '100%',
     paddingVertical: 15,
   },
   heading: {
-    color: 'white',
+    color: '#fff',
     fontSize: 22,
     fontWeight: 'bold',
   },
@@ -74,8 +74,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     marginTop: 5,
   },
+  headerCenter: {
+    border: '10px solid red',
+    color: 'red',
+  },
+
   subheaderText: {
-    color: 'white',
+    color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },

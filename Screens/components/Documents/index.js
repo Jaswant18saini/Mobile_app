@@ -50,9 +50,22 @@ const Documents = () => {
 
   const Buttons = ({item}) => {
     return (
-      <View key={item?.value?.Id}>
+      <View
+        key={item?.value?.Id}
+        style={{
+          justifyContent: 'center',
+          padding: 10,
+          flex: 1,
+          backgroundColor: 'red',
+          marginLeft: 'auto',
+          marginRight: 'auto',
+          width: '180%',
+        }}>
         <Button
           title={item?.value?.Name}
+          style={{
+            width: '180%',
+          }}
           onPress={() => handleParentFolder(item)}
         />
       </View>
@@ -61,7 +74,7 @@ const Documents = () => {
 
   const FolderView = ({item}) => {
     return (
-      <View>
+      <View style={styles.title}>
         <TouchableOpacity onPress={null}>
           <Icon type="FontAwesome" name="folder" color="grey" />
         </TouchableOpacity>
@@ -92,7 +105,8 @@ const Documents = () => {
     <>
       <View>
         <Header />
-        <View>
+        <View
+          style={{width: '100%', justifyContent: 'center', display: 'flex'}}>
           <FlatList
             data={parentFolder}
             renderItem={Buttons}
@@ -130,6 +144,20 @@ const styles = StyleSheet.create({
   tinyLogo: {
     width: 50,
     height: 50,
+  },
+  title: {
+    marginTop: 16,
+    paddingVertical: 8,
+    paddingHorizontal: 8,
+    borderWidth: 2,
+    borderColor: '#20232a',
+    display: 'flex',
+    borderRadius: 6,
+    backgroundColor: '#61dafb',
+    color: '#20232a',
+    textAlign: 'center',
+    fontSize: 30,
+    fontWeight: 'bold',
   },
 });
 export default Documents;
