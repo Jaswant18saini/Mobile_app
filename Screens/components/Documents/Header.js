@@ -2,7 +2,7 @@ import React from 'react';
 import {
   StyleSheet,
   View,
-  Text,
+  Text, 
   Linking,
   StyleProp,
   TextStyle,
@@ -30,23 +30,22 @@ const Header = props => {
       rightComponent={
         <View style={styles.headerRight}>
           <TouchableOpacity onPress={docsNavigate}>
-            <Icon type="EvilIcons" name="search" color="white" />
+            <Icon type="EvilIcons" name="search" color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity
-            style={{marginLeft: 10}}
+          <TouchableOpacity 
             onPress={playgroundNavigate}>
-            <Icon type="MaterialIcons" name="more-horiz" color="black" />
+            <Icon type="MaterialIcons" name="more-horiz" color="#fff" />
           </TouchableOpacity>
         </View>
       }
       centerComponent={
         <>
-          <View style={{padding: 10, flex: 1, background: 'red'}}>
+          <View style={styles.mainWrapper}>
             <View>
-              <Text>Documents</Text>
+              <Text style={styles.titleText}>Documents</Text>
             </View>
             <View>
-              <Text>Training Project</Text>
+              <Text style={styles.titleText}>Training Project</Text>
             </View>
           </View>
         </>
@@ -56,6 +55,12 @@ const Header = props => {
 };
 
 const styles = StyleSheet.create({
+  mainWrapper:{
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 10,
+    color: '#fff'
+  },
   headerContainer: {
     justifyContent: 'center',
     alignItems: 'center',
@@ -71,19 +76,21 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     display: 'flex',
-    flexDirection: 'row',
-    marginTop: 5,
+    flexDirection: 'row', 
   },
-  headerCenter: {
-    border: '10px solid red',
-    color: 'red',
-  },
-
   subheaderText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
   },
+  titleText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: '#fff',  
+    marginHorizontal: 10, 
+  }
 });
+
+
 
 export default Header;

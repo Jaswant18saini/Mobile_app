@@ -49,23 +49,19 @@ const Documents = () => {
   };
 
   const Buttons = ({item}) => {
+    console.log("item",item);
     return (
       <View
         key={item?.value?.Id}
-        style={{
-          justifyContent: 'center',
-          padding: 10,
-          flex: 1,
-          backgroundColor: 'red',
-          marginLeft: 'auto',
+        style={{ 
+          padding: 10,  width: '49%',
+          marginLeft: 'auto', 
           marginRight: 'auto',
-          width: '180%',
-        }}>
-        <Button
-          title={item?.value?.Name}
-          style={{
-            width: '180%',
-          }}
+        }}
+        >
+          
+        <Button 
+          title={item?.value?.Name}        
           onPress={() => handleParentFolder(item)}
         />
       </View>
@@ -74,13 +70,13 @@ const Documents = () => {
 
   const FolderView = ({item}) => {
     return (
-      <View style={styles.title}>
+      <View style={styles.buttonDown}>
         <TouchableOpacity onPress={null}>
-          <Icon type="FontAwesome" name="folder" color="grey" />
+          <Icon type="FontAwesome" name="folder" color="#000" />
         </TouchableOpacity>
         <Text>{item?.value?.Name}</Text>
         <TouchableOpacity onPress={null}>
-          <Icon type="FontAwesone" name="download" color="grey" />
+          <Icon type="FontAwesone" name="download" color="#000" />
         </TouchableOpacity>
       </View>
     );
@@ -91,13 +87,13 @@ const Documents = () => {
       image: require('../../../assets/thumbnailDemo.webp'),
     };
     return (
-      <ScrollView>
-        <View>
-          <Text>{item?.Name}</Text>
-          <Image source={data?.image} style={[{width: 150, height: 150}]} />
-          <Icon type="FontAwesone" name="download" color="grey" />
+      // <ScrollView>
+        <View style={styles.Boxwrapper}>
+          <Text style={[styles.textName,{fontWeight: '900', color: '#333'}]} >{item?.Name}</Text>
+          <Image source={data?.image} style={[{width: 100, height: 100 ,marginLeft: 'auto',marginRight: 'auto',flexWrap: 'wrap',alignItems: 'center',flex: 1,justifyContent: 'center'}]} />
+          <Icon style={{textAlign: 'center', marginTop: 15,marginBottom: 10,}} type="FontAwesone" name="download" color="#000" />
         </View>
-      </ScrollView>
+      // </ScrollView>
     );
   };
 
@@ -105,29 +101,34 @@ const Documents = () => {
     <>
       <View>
         <Header />
-        <View
-          style={{width: '100%', justifyContent: 'center', display: 'flex'}}>
-          <FlatList
+        <View >
+          <FlatList style={styles.button}
             data={parentFolder}
             renderItem={Buttons}
-            keyExtractor={item => item.value.Id}
-            horizontal
+            numColumns={2} horizontal={false}
+            keyExtractor={item => item.value.Id} 
           />
         </View>
       </View>
       <View>
         <View>
-          <Text>Folders</Text>
-          <FlatList
+          <Text style={{textAlign: 'center',marginBottom: 10,}}>Folders</Text>
+          <View style={styles.mainBx}>
+          <FlatList  
             data={folderData}
+            numColumns={2}
+            horizontal={false}
+
             renderItem={FolderView}
             keyExtractor={item => item.value.Id}
           />
+          </View>
         </View>
-        <View>
-          <Text>Documents</Text>
+        <View style={{width:"100%", paddingHorizontal: 10}}>
+          <Text style={{textAlign: 'center', marginTop: 15,marginBottom: 10,}}>Documents</Text>
           <FlatList
-            data={fileData}
+            data={fileData} numColumns={2}
+            horizontal={false}
             renderItem={FilesView}
             keyExtractor={item => item.Id}
           />
@@ -144,6 +145,7 @@ const styles = StyleSheet.create({
   tinyLogo: {
     width: 50,
     height: 50,
+    color: '#000',
   },
   title: {
     marginTop: 16,
@@ -158,6 +160,33 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontSize: 30,
     fontWeight: 'bold',
+  }, 
+  mainBx:{ 
+    alignItems: "center",  
+    flexDirection: "row",
+    justifyContent: "center",    flexWrap: "wrap",  gap: '10px',
   },
+  buttonDown:{
+    backgroundColor: '#f7f7f7', 
+    marginLeft: 0,
+    padding: 10, 
+    flexBasis: 50,
+    flexDirection: 'row', 
+    justifyContent: 'space-between',
+     flex: 1,
+    marginHorizontal: 20, margin: 4,
+  }, 
+  Boxwrapper: {  
+    flexDirection: 'column',  
+    borderWidth: 1,padding: 10,
+    borderColor: '#ccc',
+    borderStyle: 'solid',
+    gap: '5px',flex: 1, 
+    justifyContent: 'center',flex: 1,
+    width: '100%',  margin: 10
+  },
+  textName:{
+    textAlign: 'center',    
+  }
 });
 export default Documents;
