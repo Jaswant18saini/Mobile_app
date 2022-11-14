@@ -3,7 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import Home from './Screens/Home';
+// import Home from './Screens/Home';
 import Issues from './Screens/components/Issue/Index';
 import Checklists from './Screens/components/CheckLists';
 import Sync from './Screens/components/Sync';
@@ -21,9 +21,10 @@ function App() {
             tabBarIcon: ({focused, color, size}) => {
               let iconName;
 
-              if (route.name === 'Home') {
-                iconName = focused ? 'ios-home-sharp' : 'ios-home-sharp';
-              } else if (route.name === 'Documents') {
+              // if (route.name === 'Home') {
+              //   iconName = focused ? 'ios-home-sharp' : 'ios-home-sharp';
+              // } else
+              if (route.name === 'Documents') {
                 iconName = focused ? 'md-document' : 'md-document';
               } else if (route.name === 'Issue') {
                 iconName = focused ? 'md-warning' : 'md-warning';
@@ -47,7 +48,7 @@ function App() {
             tabBarActiveTintColor: 'dodgerblue',
             tabBarInactiveTintColor: 'gray',
           })}>
-          <Tab.Screen name="Home" component={Home} />
+          {/* <Tab.Screen name="Home" component={Home} /> */}
           <Tab.Screen name="Documents" component={Documents} />
           <Tab.Screen name="Issue" component={Issues} />
           <Tab.Screen name="Checklists" component={Checklists} />
