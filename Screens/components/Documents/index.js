@@ -10,7 +10,6 @@ import {
   StyleSheet,
   Image,
   NativeModules,
-  ActivityIndicator,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {create} from 'apisauce';
@@ -23,7 +22,6 @@ const Documents = () => {
   const [parentFolder, setParentFolder] = useState();
   const [folderData, setFolderData] = useState();
   const [fileData, setFileData] = useState();
-  const [loading, setLoading] = useState(false);
 
   const netInfo = useNetInfo();
 
@@ -111,38 +109,19 @@ const Documents = () => {
     });
   };
 
-  const handleDownload = val1 => {
-    val1.then(val => {
-      RNFS.downloadFile({
-        fromUrl: val?.url,
-        toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
-      }).promise.then(r => {
-        console.log('dddddddddd');
-        const updatedData = fileData?.map((valu, index) => {
-          if (valu?.Id === val.Id) {
-            valu['download'] = true;
-          }
-          return valu;
-        });
-        setFileData(updatedData);
+  const handleDownload = val => {
+    RNFS.downloadFile({
+      fromUrl: val?.url,
+      toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
+    }).promise.then(r => {
+      const updatedData = fileData?.map((valu, index) => {
+        if (valu?.Id === val.Id) {
+          valu['download'] = true;
+        }
+        return valu;
       });
+      setFileData(updatedData);
     });
-
-    // console.log('image.png',)
-    // RNFS.downloadFile({
-    //   fromUrl: val?.url,
-    //   toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
-    // }).promise.then(r => {
-
-    //   const updatedData = fileData?.map((valu, index) => {
-
-    //     if (valu?.Id===val.Id) {
-    //       valu['download'] = true;
-    //     }
-    //     return valu;
-    //   });
-    //   setFileData(updatedData)
-    // });
   };
 
   const handleParentFolder = async item => {
@@ -188,23 +167,31 @@ const Documents = () => {
       setFileData(item);
     } else {
       api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
+        // res?.data?.tree?.map(async item => {
+        //   return (item.thumbnail = '');
+        // });
+
+        //setFileData(res?.data?.tree);
+
         RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
           let datafromstorage = result?.filter(val =>
             val.name.includes('.pdf'),
           );
-          let updateData = res?.data?.tree?.map(async (val, index) => {
-            const filedata = datafromstorage?.find(data =>
+
+          res?.data?.tree?.map(async items => {
+            const filedatas = datafromstorage?.find(data =>
               data?.name.includes(val?.Id),
             );
-            val.thumbnail = '';
-            if (filedata) {
-              val['download'] = true;
+
+            if (filedatas) {
+              items['download'] = true;
             } else {
-              val['download'] = false;
+              items['download'] = false;
             }
-            return val;
+            items.thumbnail = '';
+            return items;
           });
-          setFileData(updateData);
+          setFileData(res?.data?.tree);
         });
 
         await AsyncStorage.setItem(
@@ -320,7 +307,6 @@ const Documents = () => {
 
   return (
     <>
-      <ActivityIndicator />
       <View>
         <Header />
         <View>
