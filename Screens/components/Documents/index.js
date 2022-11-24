@@ -1,7 +1,16 @@
 import React, {useEffect, useState} from 'react';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {View, Text, Button, FlatList, StyleSheet, Image,  NativeModules
+import {
+  View,
+  Text,
+  Button,
+  FlatList,
+  StyleSheet,
+  Image,
+  NativeModules,
+  ActivityIndicator,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {create} from 'apisauce';
@@ -14,6 +23,7 @@ const Documents = () => {
   const [parentFolder, setParentFolder] = useState();
   const [folderData, setFolderData] = useState();
   const [fileData, setFileData] = useState();
+  const [loading, setLoading] = useState(false);
 
   const netInfo = useNetInfo();
 
@@ -53,17 +63,6 @@ const Documents = () => {
   }, [netInfo.type, netInfo.isInternetReachable]);
   var PSPDFKit = NativeModules.PSPDFKit;
 
-
-
-
-
-
-
-
-
-
-
-
   const get = async (data = null) => {
     RNFS.readDir(RNFS.DocumentDirectoryPath)
       .then(async result => {
@@ -74,7 +73,7 @@ const Documents = () => {
             item = data;
           } else {
             const value = await AsyncStorage.getItem('FolderInfo');
-            item = fileData //JSON.parse(value);
+            item = fileData; //JSON.parse(value);
           }
           const updatedData = item?.map((val, index) => {
             const filedatas = datafromstorage?.find(data =>
@@ -99,10 +98,6 @@ const Documents = () => {
       });
   };
 
-
-
-
-
   const handleView = val => {
     const documentNew =
       Platform.OS === 'ios'
@@ -116,67 +111,92 @@ const Documents = () => {
     });
   };
 
-  const handleDownload = val => {
-    RNFS.downloadFile({
-      fromUrl: val?.url,
-      toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
-    }).promise.then(r => {
-
-      const updatedData = fileData?.map((valu, index) => {
-     
-        if (valu?.Id===val.Id) {
-          valu['download'] = true;
-        } 
-        return valu;
+  const handleDownload = val1 => {
+    val1.then(val => {
+      RNFS.downloadFile({
+        fromUrl: val?.url,
+        toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
+      }).promise.then(r => {
+        console.log('dddddddddd');
+        const updatedData = fileData?.map((valu, index) => {
+          if (valu?.Id === val.Id) {
+            valu['download'] = true;
+          }
+          return valu;
+        });
+        setFileData(updatedData);
       });
-      setFileData(updatedData)
     });
-  };
 
+    // console.log('image.png',)
+    // RNFS.downloadFile({
+    //   fromUrl: val?.url,
+    //   toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
+    // }).promise.then(r => {
+
+    //   const updatedData = fileData?.map((valu, index) => {
+
+    //     if (valu?.Id===val.Id) {
+    //       valu['download'] = true;
+    //     }
+    //     return valu;
+    //   });
+    //   setFileData(updatedData)
+    // });
+  };
 
   const handleParentFolder = async item => {
     setFolderData(item?.children);
-
-
-
-
-
-
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
 
     if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
       // const value = await AsyncStorage.getItem('FoldersFiles');
       // console.log('itemmm', value);
       // item = JSON.parse(value);
 
-
       RNFS.readDir(RNFS.DocumentDirectoryPath)
-      .then(async result => {
-        let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
-        let item = [];
-        try {
-         
+        .then(async result => {
+          let datafromstorage = result?.filter(val =>
+            val.name.includes('.pdf'),
+          );
+          let item = [];
+          try {
             const value = await AsyncStorage.getItem('FoldersFiles');
             item = JSON.parse(value);
-         
-          const updatedData = item?.map((val, index) => {
+
+            const updatedData = item?.map((val, index) => {
+              const filedata = datafromstorage?.find(data =>
+                data?.name.includes(val?.Id),
+              );
+
+              if (filedata) {
+                val['download'] = true;
+              } else {
+                val['download'] = false;
+              }
+              return val;
+            });
+
+            setFileData(updatedData);
+          } catch (err) {
+            console.log(err);
+          }
+        })
+        .catch(err => {
+          console.log(err.message, err.code);
+        });
+
+      setFileData(item);
+    } else {
+      api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
+        RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
+          let datafromstorage = result?.filter(val =>
+            val.name.includes('.pdf'),
+          );
+          let updateData = res?.data?.tree?.map(async (val, index) => {
             const filedata = datafromstorage?.find(data =>
               data?.name.includes(val?.Id),
             );
-
+            val.thumbnail = '';
             if (filedata) {
               val['download'] = true;
             } else {
@@ -184,40 +204,8 @@ const Documents = () => {
             }
             return val;
           });
-
-          setFileData(updatedData);
-        } catch (err) {
-          console.log(err);
-        }
-      })
-      .catch(err => {
-        console.log(err.message, err.code);
-      });
-      
-
-      setFileData(item);
-    } else {
-      api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
-        
- RNFS.readDir(RNFS.DocumentDirectoryPath)
-      .then(async result => {
-        let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
-       let updateData= res?.data?.tree?.map(async (val,index) => {
-          const filedata = datafromstorage?.find(data =>
-            data?.name.includes(val?.Id),
-          );
-          val.thumbnail = ''
-          if (filedata) {
-            val['download'] = true;
-          } else {
-            val['download'] = false;
-          }
-          return val;
+          setFileData(updateData);
         });
-        setFileData(updateData);
-
-
-      })
 
         await AsyncStorage.setItem(
           'FoldersFiles',
@@ -251,11 +239,11 @@ const Documents = () => {
       <ScrollView>
         <View style={styles.buttonDown}>
           <TouchableOpacity onPress={null}>
-            <Icon type="FontAwesome" name="folder" color="#000" />
+            <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
           </TouchableOpacity>
           <Text>{item?.value?.Name}</Text>
           <TouchableOpacity onPress={null}>
-            <Icon type="FontAwesone" name="download" color="#000" />
+            <FontAwesomeIcon type="FontAwesone" name="download" color="#000" />
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -287,34 +275,44 @@ const Documents = () => {
               },
             ]}
           />
-         
 
-<Icon
-            onPress={() => handleDownload(item)}
+          {(netInfo.type !== 'unknown' &&
+            netInfo.isInternetReachable === false) ||
+          item?.download ? (
+            <Ionicons
+              onPress={() => handleDownload(item)}
+              style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
+              type="Ionicons"
+              name="checkmark-done"
+              color="#00bfff"
+              size={20}
+            />
+          ) : (
+            <FontAwesomeIcon
+              onPress={() => handleDownload(item)}
+              style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
+              type="FontAwesone"
+              name="download"
+              color="#000"
+            />
+          )}
 
-            style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
-            type="FontAwesone"
-            name="download"
-            color="#000"
+          <Button
+            disabled={!item?.download}
+            title="View"
+            onPress={() => handleView(item)}
           />
-
-<Button
-                  disabled={!item?.download}
-                  title="View"
-                  onPress={() => handleView(item)}
-                />
-                <Button
-                  disabled={
-                    (netInfo.type !== 'unknown' &&
-                      netInfo.isInternetReachable === false) ||
-                      item?.download
-                  }
-                  title="Download"
-                  onPress={() => {
-                    handleDownload(item);
-                  }}
-                />
-          
+          <Button
+            disabled={
+              (netInfo.type !== 'unknown' &&
+                netInfo.isInternetReachable === false) ||
+              item?.download
+            }
+            title="Download"
+            onPress={() => {
+              handleDownload(item);
+            }}
+          />
         </View>
       </ScrollView>
     );
@@ -322,6 +320,7 @@ const Documents = () => {
 
   return (
     <>
+      <ActivityIndicator />
       <View>
         <Header />
         <View>
