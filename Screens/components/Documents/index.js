@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Image,
   NativeModules,
+  ActivityIndicator,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {create} from 'apisauce';
@@ -22,6 +23,7 @@ const Documents = () => {
   const [parentFolder, setParentFolder] = useState();
   const [folderData, setFolderData] = useState();
   const [fileData, setFileData] = useState();
+  const [loading, setLoading] = useState(false);
 
   const netInfo = useNetInfo();
 
@@ -31,13 +33,20 @@ const Documents = () => {
   });
 
   function Allfolder() {
-    api.get('/folder?projectId=a0f0r000000vIrEAAU').then(async res => {
-      setParentFolder(res?.data?.tree?.children);
-      await AsyncStorage.setItem(
-        'AllFolders',
-        JSON.stringify(res?.data?.tree?.children),
-      );
-    });
+    setLoading(true);
+    api
+      .get('/folder?projectId=a0f0r000000vIrEAAU')
+      .then(async res => {
+        setLoading(false);
+        setParentFolder(res?.data?.tree?.children);
+        await AsyncStorage.setItem(
+          'AllFolders',
+          JSON.stringify(res?.data?.tree?.children),
+        );
+      })
+      .catch(err => {
+        setLoading(false);
+      });
   }
 
   useEffect(() => {
@@ -95,7 +104,6 @@ const Documents = () => {
         console.log(err.message, err.code);
       });
   };
-
   const handleView = val => {
     const documentNew =
       Platform.OS === 'ios'
@@ -125,13 +133,9 @@ const Documents = () => {
   };
 
   const handleParentFolder = async item => {
+    setFileData([]);
     setFolderData(item?.children);
-
     if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
-      // const value = await AsyncStorage.getItem('FoldersFiles');
-      // console.log('itemmm', value);
-      // item = JSON.parse(value);
-
       RNFS.readDir(RNFS.DocumentDirectoryPath)
         .then(async result => {
           let datafromstorage = result?.filter(val =>
@@ -164,23 +168,17 @@ const Documents = () => {
           console.log(err.message, err.code);
         });
 
-      setFileData(item);
+      // setFileData(item);
     } else {
       api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
-        // res?.data?.tree?.map(async item => {
-        //   return (item.thumbnail = '');
-        // });
-
-        //setFileData(res?.data?.tree);
-
         RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
           let datafromstorage = result?.filter(val =>
             val.name.includes('.pdf'),
           );
 
-          res?.data?.tree?.map(async items => {
+          let updated_data = await res?.data?.tree?.map(async items => {
             const filedatas = datafromstorage?.find(data =>
-              data?.name.includes(val?.Id),
+              data?.name.includes(items?.Id),
             );
 
             if (filedatas) {
@@ -191,7 +189,10 @@ const Documents = () => {
             items.thumbnail = '';
             return items;
           });
-          setFileData(res?.data?.tree);
+
+          Promise.all(updated_data).then(function (results) {
+            setFileData(results);
+          });
         });
 
         await AsyncStorage.setItem(
@@ -239,7 +240,7 @@ const Documents = () => {
 
   const FilesView = ({item}) => {
     const data = {
-      image: require('../../../assets/thumbnailDemo.webp'),
+      image: require('../../../assets/thumbnailDemo2.jpg'),
     };
     return (
       <ScrollView>
@@ -267,7 +268,7 @@ const Documents = () => {
             netInfo.isInternetReachable === false) ||
           item?.download ? (
             <Ionicons
-              onPress={() => handleDownload(item)}
+              onPress={() => handleView(item)}
               style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
               type="Ionicons"
               name="checkmark-done"
@@ -284,7 +285,7 @@ const Documents = () => {
             />
           )}
 
-          <Button
+          {/* <Button
             disabled={!item?.download}
             title="View"
             onPress={() => handleView(item)}
@@ -299,7 +300,7 @@ const Documents = () => {
             onPress={() => {
               handleDownload(item);
             }}
-          />
+          /> */}
         </View>
       </ScrollView>
     );
@@ -307,45 +308,55 @@ const Documents = () => {
 
   return (
     <>
-      <View>
-        <Header />
-        <View>
-          <FlatList
-            style={styles.button}
-            data={parentFolder}
-            renderItem={Buttons}
-            numColumns={2}
-            horizontal={false}
-            keyExtractor={item => item.value.Id}
-          />
-        </View>
-      </View>
-      <View>
-        <View>
-          <Text style={{textAlign: 'center', marginBottom: 10}}>Folders</Text>
-          <View style={styles.mainBx}>
-            <FlatList
-              data={folderData}
-              numColumns={4}
-              horizontal={false}
-              renderItem={FolderView}
-              keyExtractor={item => item.value.Id}
-            />
+      {loading ? (
+        <ActivityIndicator />
+      ) : (
+        <>
+          <View>
+            <Header />
+            <View>
+              <FlatList
+                style={styles.button}
+                data={parentFolder}
+                renderItem={Buttons}
+                numColumns={2}
+                horizontal={false}
+                keyExtractor={item => item.value.Id}
+              />
+            </View>
           </View>
-        </View>
-        <View style={{width: '100%', paddingHorizontal: 10}}>
-          <Text style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}>
-            Documents
-          </Text>
-          <FlatList
-            data={fileData}
-            numColumns={4}
-            horizontal={false}
-            renderItem={FilesView}
-            keyExtractor={item => item.Id}
-          />
-        </View>
-      </View>
+          <View>
+            <View>
+              <Text style={{textAlign: 'center', marginBottom: 10}}>
+                Folders
+              </Text>
+              {/* <ActivityIndicator /> */}
+              <View style={styles.mainBx}>
+                <FlatList
+                  data={folderData}
+                  numColumns={4}
+                  horizontal={false}
+                  renderItem={FolderView}
+                  keyExtractor={item => item.value.Id}
+                />
+              </View>
+            </View>
+            <View style={{width: '100%', paddingHorizontal: 10}}>
+              <Text
+                style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}>
+                Documents
+              </Text>
+              <FlatList
+                data={fileData}
+                numColumns={4}
+                horizontal={false}
+                renderItem={FilesView}
+                keyExtractor={item => item.Id}
+              />
+            </View>
+          </View>
+        </>
+      )}
     </>
   );
 };
