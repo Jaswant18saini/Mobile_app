@@ -137,18 +137,88 @@ const Documents = () => {
   const handleParentFolder = async item => {
     setFolderData(item?.children);
 
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+
+
+
+
+
+
     if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
-      const value = await AsyncStorage.getItem('FoldersFiles');
-      console.log('itemmm', value);
-      item = JSON.parse(value);
+      // const value = await AsyncStorage.getItem('FoldersFiles');
+      // console.log('itemmm', value);
+      // item = JSON.parse(value);
+
+
+      RNFS.readDir(RNFS.DocumentDirectoryPath)
+      .then(async result => {
+        let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
+        let item = [];
+        try {
+         
+            const value = await AsyncStorage.getItem('FoldersFiles');
+            item = JSON.parse(value);
+         
+          const updatedData = item?.map((val, index) => {
+            const filedata = datafromstorage?.find(data =>
+              data?.name.includes(val?.Id),
+            );
+
+            if (filedata) {
+              val['download'] = true;
+            } else {
+              val['download'] = false;
+            }
+            return val;
+          });
+
+          setFileData(updatedData);
+        } catch (err) {
+          console.log(err);
+        }
+      })
+      .catch(err => {
+        console.log(err.message, err.code);
+      });
+      
 
       setFileData(item);
     } else {
       api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
-        res?.data?.tree?.map(async item => {
-          return (item.thumbnail = '');
+        
+ RNFS.readDir(RNFS.DocumentDirectoryPath)
+      .then(async result => {
+        let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
+       let updateData= res?.data?.tree?.map(async (val,index) => {
+          const filedata = datafromstorage?.find(data =>
+            data?.name.includes(val?.Id),
+          );
+          val.thumbnail = ''
+          if (filedata) {
+            val['download'] = true;
+          } else {
+            val['download'] = false;
+          }
+          return val;
         });
-        setFileData(res?.data?.tree);
+        setFileData(updateData);
+
+
+      })
+
         await AsyncStorage.setItem(
           'FoldersFiles',
           JSON.stringify(res?.data?.tree),
