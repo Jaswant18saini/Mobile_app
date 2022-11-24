@@ -10,6 +10,7 @@ import {
   StyleSheet,
   Image,
   NativeModules,
+  ActivityIndicator,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {create} from 'apisauce';
@@ -22,7 +23,8 @@ const Documents = () => {
   const [parentFolder, setParentFolder] = useState();
   const [folderData, setFolderData] = useState();
   const [fileData, setFileData] = useState();
-
+  const [loader, setLoader] = useState(false);
+  const [currentFile, setCurrentFile] = useState([]);
   const netInfo = useNetInfo();
 
   const api = create({
@@ -97,16 +99,38 @@ const Documents = () => {
   };
 
   const handleView = val => {
-    const documentNew =
-      Platform.OS === 'ios'
-        ? 'Document.pdf'
-        : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`;
-    PSPDFKit.present(documentNew, {
-      showThumbnailBar: 'scrollable',
-      pageTransition: 'scrollContinuous',
-      scrollDirection: 'vertical',
-      documentLabelEnabled: true,
-    });
+    setCurrentFile(val);
+    if (!val?.download && netInfo.isInternetReachable === true) {
+      setLoader(true);
+      const result = Math.random().toString(36).substring(2, 7);
+      RNFS.downloadFile({
+        fromUrl: val?.url,
+        toFile: `${RNFS.DocumentDirectoryPath}/${result}.pdf`,
+      }).promise.then(r => {
+        const documentNew =
+          Platform.OS === 'ios'
+            ? 'Document.pdf'
+            : `file://${RNFS.DocumentDirectoryPath}/${result}.pdf`;
+        setLoader(false);
+        PSPDFKit.present(documentNew, {
+          showThumbnailBar: 'scrollable',
+          pageTransition: 'scrollContinuous',
+          scrollDirection: 'vertical',
+          documentLabelEnabled: true,
+        });
+      });
+    } else {
+      const documentNew =
+        Platform.OS === 'ios'
+          ? 'Document.pdf'
+          : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`;
+      PSPDFKit.present(documentNew, {
+        showThumbnailBar: 'scrollable',
+        pageTransition: 'scrollContinuous',
+        scrollDirection: 'vertical',
+        documentLabelEnabled: true,
+      });
+    }
   };
 
   const handleDownload = val => {
@@ -262,7 +286,7 @@ const Documents = () => {
               },
             ]}
           />
-
+          {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {(netInfo.type !== 'unknown' &&
             netInfo.isInternetReachable === false) ||
           item?.download ? (
@@ -285,7 +309,7 @@ const Documents = () => {
           )}
 
           <Button
-            disabled={!item?.download}
+            // disabled={!item?.download}
             title="View"
             onPress={() => handleView(item)}
           />
