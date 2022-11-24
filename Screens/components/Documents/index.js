@@ -1,7 +1,8 @@
 import React, {useEffect, useState} from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {View, Text, Button, FlatList, StyleSheet, Image} from 'react-native';
+import {View, Text, Button, FlatList, StyleSheet, Image,  NativeModules
+} from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {create} from 'apisauce';
 import Header from './Header';
@@ -50,6 +51,30 @@ const Documents = () => {
       Allfolder();
     }
   }, [netInfo.type, netInfo.isInternetReachable]);
+  var PSPDFKit = NativeModules.PSPDFKit;
+
+
+  const handleView = val => {
+    const documentNew =
+      Platform.OS === 'ios'
+        ? 'Document.pdf'
+        : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`;
+    PSPDFKit.present(documentNew, {
+      showThumbnailBar: 'scrollable',
+      pageTransition: 'scrollContinuous',
+      scrollDirection: 'vertical',
+      documentLabelEnabled: true,
+    });
+  };
+
+  const handleDownload = val => {
+    RNFS.downloadFile({
+      fromUrl: val?.url,
+      toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
+    }).promise.then(r => {
+      console.log('working', RNFS.DocumentDirectoryPath);
+    });
+  };
 
   console.log('fileData', fileData);
 
@@ -137,11 +162,24 @@ const Documents = () => {
             ]}
           />
           <Icon
+            onPress={() => handleView(item)}
+
+            style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
+            type="font-awesome"
+            name="eye"
+            color="#000"
+          />
+
+<Icon
+            onPress={() => handleDownload(item)}
+
             style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
             type="FontAwesone"
             name="download"
             color="#000"
           />
+
+          
         </View>
       </ScrollView>
     );
