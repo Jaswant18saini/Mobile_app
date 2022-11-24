@@ -53,7 +53,6 @@ const Documents = () => {
     Allfolder();
   }, []);
   const checkNet = async () => {
-    console.log('herererere123');
     const value = await AsyncStorage.getItem('AllFolders');
     console.log('itemmm', value);
     item = JSON.parse(value);
@@ -121,15 +120,17 @@ const Documents = () => {
     RNFS.downloadFile({
       fromUrl: val?.url,
       toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
-    }).promise.then(r => {
-      const updatedData = fileData?.map((valu, index) => {
-        if (valu?.Id === val.Id) {
-          valu['download'] = true;
-        }
-        return valu;
-      });
-      setFileData(updatedData);
-    });
+    })
+      .promise.then(r => {
+        const updatedData = fileData?.map((valu, index) => {
+          if (valu?.Id === val.Id) {
+            valu['download'] = true;
+          }
+          return valu;
+        });
+        setFileData(updatedData);
+      })
+      .catch(err => {});
   };
 
   const handleParentFolder = async item => {
@@ -170,36 +171,39 @@ const Documents = () => {
 
       // setFileData(item);
     } else {
-      api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
-        RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
-          let datafromstorage = result?.filter(val =>
-            val.name.includes('.pdf'),
-          );
-
-          let updated_data = await res?.data?.tree?.map(async items => {
-            const filedatas = datafromstorage?.find(data =>
-              data?.name.includes(items?.Id),
+      api
+        .get(`/folderfiles/${item?.value?.Id}`)
+        .then(async res => {
+          RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
+            let datafromstorage = result?.filter(val =>
+              val.name.includes('.pdf'),
             );
 
-            if (filedatas) {
-              items['download'] = true;
-            } else {
-              items['download'] = false;
-            }
-            items.thumbnail = '';
-            return items;
+            let updated_data = await res?.data?.tree?.map(async items => {
+              const filedatas = datafromstorage?.find(data =>
+                data?.name.includes(items?.Id),
+              );
+
+              if (filedatas) {
+                items['download'] = true;
+              } else {
+                items['download'] = false;
+              }
+              items.thumbnail = '';
+              return items;
+            });
+
+            Promise.all(updated_data).then(function (results) {
+              setFileData(results);
+            });
           });
 
-          Promise.all(updated_data).then(function (results) {
-            setFileData(results);
-          });
-        });
-
-        await AsyncStorage.setItem(
-          'FoldersFiles',
-          JSON.stringify(res?.data?.tree),
-        );
-      });
+          await AsyncStorage.setItem(
+            'FoldersFiles',
+            JSON.stringify(res?.data?.tree),
+          );
+        })
+        .catch(err => {});
     }
   };
 
@@ -224,7 +228,7 @@ const Documents = () => {
 
   const FolderView = ({item}) => {
     return (
-      <ScrollView>
+      <ScrollView style={styles.scrollView}>
         <View style={styles.buttonDown}>
           <TouchableOpacity onPress={null}>
             <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
@@ -263,7 +267,7 @@ const Documents = () => {
               },
             ]}
           />
-
+          <ActivityIndicator />
           {(netInfo.type !== 'unknown' &&
             netInfo.isInternetReachable === false) ||
           item?.download ? (
@@ -305,7 +309,7 @@ const Documents = () => {
       </ScrollView>
     );
   };
-
+  console.log('folderData.length', folderData);
   return (
     <>
       {loading ? (
@@ -330,29 +334,41 @@ const Documents = () => {
               <Text style={{textAlign: 'center', marginBottom: 10}}>
                 Folders
               </Text>
-              {/* <ActivityIndicator /> */}
               <View style={styles.mainBx}>
-                <FlatList
-                  data={folderData}
-                  numColumns={4}
-                  horizontal={false}
-                  renderItem={FolderView}
-                  keyExtractor={item => item.value.Id}
-                />
+                {fileData?.length === 0 ? (
+                  <ActivityIndicator />
+                ) : (
+                  <FlatList
+                    data={folderData}
+                    numColumns={4}
+                    horizontal={false}
+                    renderItem={FolderView}
+                    keyExtractor={item => item.value.Id}
+                  />
+                )}
               </View>
             </View>
             <View style={{width: '100%', paddingHorizontal: 10}}>
               <Text
-                style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}>
+                style={{
+                  textAlign: 'center',
+                  marginTop: 15,
+                  marginBottom: 10,
+                }}>
                 Documents
               </Text>
-              <FlatList
-                data={fileData}
-                numColumns={4}
-                horizontal={false}
-                renderItem={FilesView}
-                keyExtractor={item => item.Id}
-              />
+
+              {fileData?.length === 0 ? (
+                <ActivityIndicator />
+              ) : (
+                <FlatList
+                  data={fileData}
+                  numColumns={4}
+                  horizontal={false}
+                  renderItem={FilesView}
+                  keyExtractor={item => item.Id}
+                />
+              )}
             </View>
           </View>
         </>
@@ -365,6 +381,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
   tinyLogo: {
     width: 50,
     height: 50,
