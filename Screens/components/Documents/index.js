@@ -54,6 +54,55 @@ const Documents = () => {
   var PSPDFKit = NativeModules.PSPDFKit;
 
 
+
+
+
+
+
+
+
+
+
+
+  const get = async (data = null) => {
+    RNFS.readDir(RNFS.DocumentDirectoryPath)
+      .then(async result => {
+        let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
+        let item = [];
+        try {
+          if (data) {
+            item = data;
+          } else {
+            const value = await AsyncStorage.getItem('FolderInfo');
+            item = fileData //JSON.parse(value);
+          }
+          const updatedData = item?.map((val, index) => {
+            const filedatas = datafromstorage?.find(data =>
+              data?.name.includes(val?.Id),
+            );
+
+            if (filedatas) {
+              val['download'] = true;
+            } else {
+              val['download'] = false;
+            }
+            return val;
+          });
+
+          setFileData(updatedData);
+        } catch (err) {
+          console.log(err);
+        }
+      })
+      .catch(err => {
+        console.log(err.message, err.code);
+      });
+  };
+
+
+
+
+
   const handleView = val => {
     const documentNew =
       Platform.OS === 'ios'
@@ -72,11 +121,18 @@ const Documents = () => {
       fromUrl: val?.url,
       toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
     }).promise.then(r => {
-      console.log('working', RNFS.DocumentDirectoryPath);
+
+      const updatedData = fileData?.map((valu, index) => {
+     
+        if (valu?.Id===val.Id) {
+          valu['download'] = true;
+        } 
+        return valu;
+      });
+      setFileData(updatedData)
     });
   };
 
-  console.log('fileData', fileData);
 
   const handleParentFolder = async item => {
     setFolderData(item?.children);
@@ -161,14 +217,7 @@ const Documents = () => {
               },
             ]}
           />
-          <Icon
-            onPress={() => handleView(item)}
-
-            style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
-            type="font-awesome"
-            name="eye"
-            color="#000"
-          />
+         
 
 <Icon
             onPress={() => handleDownload(item)}
@@ -179,6 +228,22 @@ const Documents = () => {
             color="#000"
           />
 
+<Button
+                  disabled={!item?.download}
+                  title="View"
+                  onPress={() => handleView(item)}
+                />
+                <Button
+                  disabled={
+                    (netInfo.type !== 'unknown' &&
+                      netInfo.isInternetReachable === false) ||
+                      item?.download
+                  }
+                  title="Download"
+                  onPress={() => {
+                    handleDownload(item);
+                  }}
+                />
           
         </View>
       </ScrollView>
