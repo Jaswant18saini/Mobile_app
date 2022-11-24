@@ -198,27 +198,40 @@ const Documents = () => {
       setFileData(item);
     } else {
       api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
-        
- RNFS.readDir(RNFS.DocumentDirectoryPath)
-      .then(async result => {
-        let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
-       let updateData= res?.data?.tree?.map(async (val,index) => {
-          const filedata = datafromstorage?.find(data =>
+        // res?.data?.tree?.map(async item => {
+        //   return (item.thumbnail = '');
+        // });
+
+        //setFileData(res?.data?.tree);
+
+        RNFS.readDir(RNFS.DocumentDirectoryPath)
+        .then(async result => {
+          let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
+
+        res?.data?.tree?.map(async items => {
+          
+          const filedatas = datafromstorage?.find(data =>
             data?.name.includes(val?.Id),
           );
-          val.thumbnail = ''
-          if (filedata) {
-            val['download'] = true;
+
+          if (filedatas) {
+            items['download'] = true;
           } else {
-            val['download'] = false;
+            items['download'] = false;
           }
-          return val;
+          items.thumbnail = ''
+          return items;
+
         });
-        setFileData(updateData);
+        setFileData(res?.data?.tree);
+
+      });
 
 
-      })
 
+
+
+        
         await AsyncStorage.setItem(
           'FoldersFiles',
           JSON.stringify(res?.data?.tree),
