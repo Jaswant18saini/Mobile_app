@@ -143,8 +143,6 @@ const Documents = () => {
   };
 
   const handleDownload = val => {
-    setCurrentFile(val);
-    setLoaderForDownload(true);
     RNFS.downloadFile({
       fromUrl: val?.url,
       toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
@@ -156,7 +154,6 @@ const Documents = () => {
           }
           return valu;
         });
-        setLoaderForDownload(false);
         setFileData(updatedData);
       })
       .catch(err => {});
@@ -281,23 +278,21 @@ const Documents = () => {
           <Text style={[styles.textName, {fontWeight: '900', color: '#333'}]}>
             {item?.Name}
           </Text>
-          <TouchableHighlight onPress={() => handleView(item)}>
-            <Image
-              source={data?.image}
-              style={[
-                {
-                  width: 100,
-                  height: 100,
-                  marginLeft: 'auto',
-                  marginRight: 'auto',
-                  flexWrap: 'wrap',
-                  alignItems: 'center',
-                  flex: 1,
-                  justifyContent: 'center',
-                },
-              ]}
-            />
-          </TouchableHighlight>
+          <Image
+            source={data?.image}
+            style={[
+              {
+                width: '100%',
+                height: 150,
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                flex: 1,
+                justifyContent: 'center',
+              },
+            ]}
+          />
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {(netInfo.type !== 'unknown' &&
             netInfo.isInternetReachable === false) ||
@@ -308,10 +303,8 @@ const Documents = () => {
               type="Ionicons"
               name="checkmark-done"
               color="#00bfff"
-              size={20}
+              size={25}
             />
-          ) : currentFile.Id === item?.Id && loaderForDownload ? (
-            <ActivityIndicator />
           ) : (
             <FontAwesomeIcon
               onPress={() => handleDownload(item)}
@@ -319,6 +312,7 @@ const Documents = () => {
               type="FontAwesone"
               name="download"
               color="#000"
+              size={25}
             />
           )}
 
@@ -342,7 +336,7 @@ const Documents = () => {
       </ScrollView>
     );
   };
-  console.log('folderData.length', folderData);
+
   return (
     <>
       {loading ? (
@@ -362,48 +356,50 @@ const Documents = () => {
               />
             </View>
           </View>
-          <View>
+          <ScrollView>
             <View>
-              <Text style={{textAlign: 'center', marginBottom: 10}}>
-                Folders
-              </Text>
-              <View style={styles.mainBx}>
+              <View>
+                <Text style={{textAlign: 'center', marginBottom: 10}}>
+                  Folders
+                </Text>
+                <View style={styles.mainBx}>
+                  {fileData?.length === 0 ? (
+                    <ActivityIndicator />
+                  ) : (
+                    <FlatList
+                      data={folderData}
+                      numColumns={3}
+                      horizontal={false}
+                      renderItem={FolderView}
+                      keyExtractor={item => item.value.Id}
+                    />
+                  )}
+                </View>
+              </View>
+              <View style={{width: '100%', paddingHorizontal: 10}}>
+                <Text
+                  style={{
+                    textAlign: 'center',
+                    marginTop: 15,
+                    marginBottom: 10,
+                  }}>
+                  Documents
+                </Text>
+
                 {fileData?.length === 0 ? (
                   <ActivityIndicator />
                 ) : (
                   <FlatList
-                    data={folderData}
+                    data={fileData}
                     numColumns={4}
                     horizontal={false}
-                    renderItem={FolderView}
-                    keyExtractor={item => item.value.Id}
+                    renderItem={FilesView}
+                    keyExtractor={item => item.Id}
                   />
                 )}
               </View>
             </View>
-            <View style={{width: '100%', paddingHorizontal: 10}}>
-              <Text
-                style={{
-                  textAlign: 'center',
-                  marginTop: 15,
-                  marginBottom: 10,
-                }}>
-                Documents
-              </Text>
-
-              {fileData?.length === 0 ? (
-                <ActivityIndicator />
-              ) : (
-                <FlatList
-                  data={fileData}
-                  numColumns={4}
-                  horizontal={false}
-                  renderItem={FilesView}
-                  keyExtractor={item => item.Id}
-                />
-              )}
-            </View>
-          </View>
+          </ScrollView>
         </>
       )}
     </>
@@ -412,6 +408,7 @@ const Documents = () => {
 
 const styles = StyleSheet.create({
   container: {
+    backgroundColor: '#e7ecf0',
     flex: 1,
   },
 
@@ -439,18 +436,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     flexWrap: 'wrap',
-    gap: '10px',
+    backgroundColor: '#e7ecf0',
   },
   buttonDown: {
-    backgroundColor: '#f7f7f7',
-    marginLeft: 0,
-    padding: 10,
+    backgroundColor: 'white',
+    padding: 15,
+    gap: 10,
     flexBasis: 50,
     flexDirection: 'row',
     justifyContent: 'space-between',
     flex: 1,
-    marginHorizontal: 20,
-    margin: 4,
+    width: '100%',
+    color: '#000',
   },
   Boxwrapper: {
     flexDirection: 'column',
@@ -458,12 +455,13 @@ const styles = StyleSheet.create({
     padding: 10,
     borderColor: '#ccc',
     borderStyle: 'solid',
-    gap: '5px',
+    gap: '15px',
     flex: 1,
     justifyContent: 'center',
-    flex: 1,
     width: '100%',
     margin: 10,
+    backgroundColor: 'white',
+    textAlign: 'left',
   },
   textName: {
     textAlign: 'center',
