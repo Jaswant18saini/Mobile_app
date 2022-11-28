@@ -12,7 +12,7 @@ import {
   NativeModules,
   ActivityIndicator,
   TouchableHighlight,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {create} from 'apisauce';
@@ -29,6 +29,7 @@ const Documents = () => {
   const [currentFile, setCurrentFile] = useState([]);
   const [loading, setLoading] = useState(false);
   const [loaderForDownload, setLoaderForDownload] = useState(false);
+  const [selectedfolder, setSelectedFolder] = useState(null);
 
   const netInfo = useNetInfo();
 
@@ -119,7 +120,7 @@ const Documents = () => {
       }).promise.then(r => {
         const documentNew =
           Platform.OS === 'ios'
-            ? 'Document.pdf'
+            ? `${RNFS.DocumentDirectoryPath}/${result}.pdf`
             : `file://${RNFS.DocumentDirectoryPath}/${result}.pdf`;
         setLoader(false);
         PSPDFKit.present(documentNew, {
@@ -132,7 +133,7 @@ const Documents = () => {
     } else {
       const documentNew =
         Platform.OS === 'ios'
-          ? 'Document.pdf'
+          ? `${RNFS.DocumentDirectoryPath}/${val?.id}.pdf`
           : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`;
       PSPDFKit.present(documentNew, {
         showThumbnailBar: 'scrollable',
@@ -164,6 +165,7 @@ const Documents = () => {
   };
 
   const handleParentFolder = async item => {
+    setSelectedFolder(null);
     setFileData([]);
     setFolderData(item?.children);
     if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
@@ -238,6 +240,7 @@ const Documents = () => {
   };
 
   const handleFolderClick = async item => {
+    setSelectedFolder(item?.value?.Name);
     setFileData([]);
     setFolderData(item?.children);
     if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
@@ -333,20 +336,37 @@ const Documents = () => {
   const FolderView = ({item}) => {
     return (
       <ScrollView style={styles.scrollView}>
-              <TouchableWithoutFeedback   onPress={() => handleFolderClick(item)}
->
-
-        <View style={styles.buttonDown} onPress={()=>console.log('test01')}>
+        <TouchableWithoutFeedback onPress={() => handleFolderClick(item)}>
+          <View style={styles.buttonDown}>
+            <TouchableOpacity>
+              <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
+            </TouchableOpacity>
+            <Text>{item?.value?.Name}</Text>
+            <TouchableOpacity onPress={null}>
+              <FontAwesomeIcon
+                type="FontAwesone"
+                name="download"
+                color="#000"
+              />
+            </TouchableOpacity>
+          </View>
+        </TouchableWithoutFeedback>
+      </ScrollView>
+    );
+  };
+  const SelectedFolder = () => {
+    return (
+      <TouchableWithoutFeedback>
+        <View style={styles.buttonDown}>
           <TouchableOpacity>
             <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
           </TouchableOpacity>
-          <Text>{item?.value?.Name}</Text>
+          <Text>{selectedfolder}</Text>
           <TouchableOpacity onPress={null}>
             <FontAwesomeIcon type="FontAwesone" name="download" color="#000" />
           </TouchableOpacity>
         </View>
-        </TouchableWithoutFeedback>
-      </ScrollView>
+      </TouchableWithoutFeedback>
     );
   };
 
@@ -445,6 +465,7 @@ const Documents = () => {
           <ScrollView>
             <View>
               <View>
+                {selectedfolder ? <SelectedFolder /> : ''}
                 <Text style={{textAlign: 'center', marginBottom: 10}}>
                   Folders
                 </Text>
@@ -456,14 +477,7 @@ const Documents = () => {
                       data={folderData}
                       numColumns={3}
                       horizontal={false}
-                      renderItem={({item}) => (
-                        <FolderView
-                          item={item}
-                          onPress={item => {
-                            console.log('xxxxxxx');
-                          }}
-                        />
-                      )}
+                      renderItem={({item}) => <FolderView item={item} />}
                       ItemSeparatorComponent={() => (
                         <View style={{height: 10}} />
                       )}
