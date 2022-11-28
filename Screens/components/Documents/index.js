@@ -12,7 +12,7 @@ import {
   NativeModules,
   ActivityIndicator,
   TouchableHighlight,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {create} from 'apisauce';
@@ -333,18 +333,20 @@ const Documents = () => {
   const FolderView = ({item}) => {
     return (
       <ScrollView style={styles.scrollView}>
-              <TouchableWithoutFeedback   onPress={() => handleFolderClick(item)}
->
-
-        <View style={styles.buttonDown} onPress={()=>console.log('test01')}>
-          <TouchableOpacity>
-            <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
-          </TouchableOpacity>
-          <Text>{item?.value?.Name}</Text>
-          <TouchableOpacity onPress={null}>
-            <FontAwesomeIcon type="FontAwesone" name="download" color="#000" />
-          </TouchableOpacity>
-        </View>
+        <TouchableWithoutFeedback onPress={() => handleFolderClick(item)}>
+          <View style={styles.buttonDown} onPress={() => console.log('test01')}>
+            <TouchableOpacity>
+              <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
+            </TouchableOpacity>
+            <Text>{item?.value?.Name}</Text>
+            <TouchableOpacity onPress={null}>
+              <FontAwesomeIcon
+                type="FontAwesone"
+                name="download"
+                color="#000"
+              />
+            </TouchableOpacity>
+          </View>
         </TouchableWithoutFeedback>
       </ScrollView>
     );

@@ -12,6 +12,7 @@ import DialyLogs from './Screens/components/Dialy-logs';
 import More from './Screens/components/More';
 import Documents from './Screens/components/Documents';
 import {Text, View} from 'react-native';
+import Login from './Screens/components/Login';
 
 function App() {
   const Tab = createBottomTabNavigator();
@@ -43,6 +44,8 @@ function App() {
                 iconName = focused
                   ? 'md-ellipsis-horizontal-circle-sharp'
                   : 'md-ellipsis-horizontal-circle-outline';
+              } else if (route.name === 'Login') {
+                iconName = focused ? 'log-in' : 'log-in-outline';
               }
 
               // You can return any component that you like here!
@@ -58,6 +61,7 @@ function App() {
           <Tab.Screen name="Sync" component={Sync} />
           <Tab.Screen name="Daily-logs" component={DialyLogs} />
           <Tab.Screen name="More" component={More} />
+          <Tab.Screen name="Login" component={Login} />
         </Tab.Navigator>
         {netInfo.type !== 'unknown' && netInfo.isInternetReachable === false ? (
           <View style={{alignItems: 'center'}}>

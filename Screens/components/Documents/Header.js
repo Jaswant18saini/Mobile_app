@@ -2,11 +2,12 @@ import React from 'react';
 import {
   StyleSheet,
   View,
-  Text, 
+  Text,
   Linking,
-  StyleProp,
+  Image,
   TextStyle,
   ViewStyle,
+  TouchableHighlight,
 } from 'react-native';
 import {Header as HeaderRNE, HeaderProps, Icon} from '@rneui/themed';
 import {create} from 'apisauce';
@@ -15,12 +16,12 @@ import {TouchableOpacity} from 'react-native-gesture-handler';
 const Header = props => {
   const docsNavigate = () => {
     Linking.openURL(`https://reactnativeelements.com/docs/${props.view}`);
+    console.log('On login click');
   };
 
   const playgroundNavigate = () => {
     Linking.openURL(`https://@rneui/themed.js.org/#/${props.view}`);
   };
-
   return (
     <HeaderRNE
       leftComponent={{
@@ -32,8 +33,7 @@ const Header = props => {
           <TouchableOpacity onPress={docsNavigate}>
             <Icon type="EvilIcons" name="search" color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity 
-            onPress={playgroundNavigate}>
+          <TouchableOpacity onPress={playgroundNavigate}>
             <Icon type="MaterialIcons" name="more-horiz" color="#fff" />
           </TouchableOpacity>
         </View>
@@ -55,11 +55,11 @@ const Header = props => {
 };
 
 const styles = StyleSheet.create({
-  mainWrapper:{
+  mainWrapper: {
     display: 'flex',
     flexDirection: 'row',
     gap: 10,
-    color: '#fff'
+    color: '#fff',
   },
   headerContainer: {
     justifyContent: 'center',
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   },
   headerRight: {
     display: 'flex',
-    flexDirection: 'row', 
+    flexDirection: 'row',
   },
   subheaderText: {
     color: '#fff',
@@ -85,12 +85,10 @@ const styles = StyleSheet.create({
   },
   titleText: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: '#fff',  
-    marginHorizontal: 10, 
-  }
+    fontWeight: 'bold',
+    color: '#fff',
+    marginHorizontal: 10,
+  },
 });
-
-
 
 export default Header;
