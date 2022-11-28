@@ -3,6 +3,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import {useNetInfo} from '@react-native-community/netinfo';
 // import Home from './Screens/Home';
 import Issues from './Screens/components/Issue/Index';
 import Checklists from './Screens/components/CheckLists';
@@ -10,9 +11,11 @@ import Sync from './Screens/components/Sync';
 import DialyLogs from './Screens/components/Dialy-logs';
 import More from './Screens/components/More';
 import Documents from './Screens/components/Documents';
+import {Text, View} from 'react-native';
 
 function App() {
   const Tab = createBottomTabNavigator();
+  const netInfo = useNetInfo();
   return (
     <NavigationContainer>
       <SafeAreaProvider>
@@ -56,6 +59,13 @@ function App() {
           <Tab.Screen name="Daily-logs" component={DialyLogs} />
           <Tab.Screen name="More" component={More} />
         </Tab.Navigator>
+        {netInfo.type !== 'unknown' && netInfo.isInternetReachable === false ? (
+          <View style={{alignItems: 'center'}}>
+            <Text style={{fontWeight: 'bold'}}>No Internet Connection</Text>
+          </View>
+        ) : (
+          ''
+        )}
       </SafeAreaProvider>
     </NavigationContainer>
   );
