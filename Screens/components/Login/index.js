@@ -10,27 +10,24 @@ const Login = () => {
     image: require('../../../assets/Salesforce_logo.png'),
   };
   return (
-    <View>
-      <Button title="Login with" onPress={() => onLoginClick()} />
-      <TouchableHighlight onPress={() => onLoginClick()}>
-        <Image
-          source={data?.image}
-          style={[
-            {
-              width: '100%',
-              height: 150,
-              // marginLeft: 'auto',
-              // marginRight: 'auto',
-              // flexWrap: 'wrap',
-              // alignItems: 'center',
-              // flex: 1,
-              // color: '#fff',
-              // justifyContent: 'center',
-            },
-          ]}
-        />
-      </TouchableHighlight>
-    </View>
+    <>
+      <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
+        <Button title="Login with" onPress={() => onLoginClick()} />
+      </View>
+      <View>
+        <TouchableHighlight onPress={() => onLoginClick()}>
+          <Image
+            source={data?.image}
+            style={[
+              {
+                width: '100%',
+                height: 150,
+              },
+            ]}
+          />
+        </TouchableHighlight>
+      </View>
+    </>
   );
 };
 export default Login;

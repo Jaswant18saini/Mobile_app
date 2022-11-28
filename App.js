@@ -58,10 +58,10 @@ function App() {
           <Tab.Screen name="Documents" component={Documents} />
           <Tab.Screen name="Issue" component={Issues} />
           <Tab.Screen name="Checklists" component={Checklists} />
+          <Tab.Screen name="Login" component={Login} />
           <Tab.Screen name="Sync" component={Sync} />
           <Tab.Screen name="Daily-logs" component={DialyLogs} />
           <Tab.Screen name="More" component={More} />
-          <Tab.Screen name="Login" component={Login} />
         </Tab.Navigator>
         {netInfo.type !== 'unknown' && netInfo.isInternetReachable === false ? (
           <View style={{alignItems: 'center'}}>
