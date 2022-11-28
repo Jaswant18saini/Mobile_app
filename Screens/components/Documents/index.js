@@ -143,6 +143,8 @@ const Documents = () => {
   };
 
   const handleDownload = val => {
+    setCurrentFile(val);
+    setLoaderForDownload(true);
     RNFS.downloadFile({
       fromUrl: val?.url,
       toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
@@ -154,6 +156,7 @@ const Documents = () => {
           }
           return valu;
         });
+        setLoaderForDownload(false);
         setFileData(updatedData);
       })
       .catch(err => {});
@@ -278,21 +281,23 @@ const Documents = () => {
           <Text style={[styles.textName, {fontWeight: '900', color: '#333'}]}>
             {item?.Name}
           </Text>
-          <Image
-            source={data?.image}
-            style={[
-              {
-                width: '100%',
-                height: 150,
-                marginLeft: 'auto',
-                marginRight: 'auto',
-                flexWrap: 'wrap',
-                alignItems: 'center',
-                flex: 1,
-                justifyContent: 'center',
-              },
-            ]}
-          />
+          <TouchableHighlight onPress={() => handleView(item)}>
+            <Image
+              source={data?.image}
+              style={[
+                {
+                  width: '100%',
+                  height: 150,
+                  marginLeft: 'auto',
+                  marginRight: 'auto',
+                  flexWrap: 'wrap',
+                  alignItems: 'center',
+                  flex: 1,
+                  justifyContent: 'center',
+                },
+              ]}
+            />
+          </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {(netInfo.type !== 'unknown' &&
             netInfo.isInternetReachable === false) ||
@@ -305,6 +310,8 @@ const Documents = () => {
               color="#00bfff"
               size={25}
             />
+          ) : currentFile.Id === item?.Id && loaderForDownload ? (
+            <ActivityIndicator />
           ) : (
             <FontAwesomeIcon
               onPress={() => handleDownload(item)}
