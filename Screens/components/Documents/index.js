@@ -236,6 +236,80 @@ const Documents = () => {
     }
   };
 
+  const handleFolderClick = async item => {
+    setFileData([]);
+    setFolderData(item?.children);
+    if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
+      RNFS.readDir(RNFS.DocumentDirectoryPath)
+        .then(async result => {
+          let datafromstorage = result?.filter(val =>
+            val.name.includes('.pdf'),
+          );
+          let item = [];
+          try {
+            const value = await AsyncStorage.getItem('FoldersFiles');
+            item = JSON.parse(value);
+
+            const updatedData = item?.map((val, index) => {
+              const filedata = datafromstorage?.find(data =>
+                data?.name.includes(val?.Id),
+              );
+
+              if (filedata) {
+                val['download'] = true;
+              } else {
+                val['download'] = false;
+              }
+              return val;
+            });
+
+            setFileData(updatedData);
+          } catch (err) {
+            console.log(err);
+          }
+        })
+        .catch(err => {
+          console.log(err.message, err.code);
+        });
+
+      // setFileData(item);
+    } else {
+      api
+        .get(`/folderfiles/${item?.value?.Id}`)
+        .then(async res => {
+          RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
+            let datafromstorage = result?.filter(val =>
+              val.name.includes('.pdf'),
+            );
+
+            let updated_data = await res?.data?.tree?.map(async items => {
+              const filedatas = datafromstorage?.find(data =>
+                data?.name.includes(items?.Id),
+              );
+
+              if (filedatas) {
+                items['download'] = true;
+              } else {
+                items['download'] = false;
+              }
+              items.thumbnail = '';
+              return items;
+            });
+
+            Promise.all(updated_data).then(function (results) {
+              setFileData(results);
+            });
+          });
+
+          await AsyncStorage.setItem(
+            'FoldersFiles',
+            JSON.stringify(res?.data?.tree),
+          );
+        })
+        .catch(err => {});
+    }
+  };
+
   const Buttons = ({item}) => {
     console.log('item', item);
     return (
@@ -258,8 +332,13 @@ const Documents = () => {
   const FolderView = ({item}) => {
     return (
       <ScrollView style={styles.scrollView}>
+        {/*  <Button
+        title={item?.value?.Name}
+         onPress={() => handleFolderClick(item)}
+       /> */}
+
         <View style={styles.buttonDown}>
-          <TouchableOpacity onPress={null}>
+          <TouchableOpacity onPress={console.log('Rammamama')}>
             <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
           </TouchableOpacity>
           <Text>{item?.value?.Name}</Text>
@@ -377,7 +456,17 @@ const Documents = () => {
                       data={folderData}
                       numColumns={3}
                       horizontal={false}
-                      renderItem={FolderView}
+                      renderItem={({item}) => (
+                        <FolderView
+                          item={item}
+                          onPress={item => {
+                            () => console.log('xxxxxxx');
+                          }}
+                        />
+                      )}
+                      ItemSeparatorComponent={() => (
+                        <View style={{height: 10}} />
+                      )}
                       keyExtractor={item => item.value.Id}
                     />
                   )}
@@ -448,7 +537,6 @@ const styles = StyleSheet.create({
   buttonDown: {
     backgroundColor: 'white',
     padding: 15,
-    gap: 10,
     flexBasis: 50,
     flexDirection: 'row',
     justifyContent: 'space-between',
