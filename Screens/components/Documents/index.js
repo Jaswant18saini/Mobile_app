@@ -336,7 +336,11 @@ const Documents = () => {
   const FolderView = ({item}) => {
     return (
       <ScrollView style={styles.scrollView}>
-        <TouchableWithoutFeedback onPress={() => handleFolderClick(item)}>
+        <TouchableWithoutFeedback
+          disabled={
+            netInfo.type !== 'unknown' && netInfo.isInternetReachable === false
+          }
+          onPress={() => handleFolderClick(item)}>
           <View style={styles.buttonDown}>
             <TouchableOpacity>
               <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
@@ -380,7 +384,13 @@ const Documents = () => {
           <Text style={[styles.textName, {fontWeight: '900', color: '#333'}]}>
             {item?.Name}
           </Text>
-          <TouchableHighlight onPress={() => handleView(item)}>
+          <TouchableHighlight
+            disabled={
+              netInfo.type !== 'unknown' &&
+              netInfo.isInternetReachable === false &&
+              !item?.download
+            }
+            onPress={() => handleView(item)}>
             <Image
               source={data?.image}
               style={[
@@ -398,8 +408,8 @@ const Documents = () => {
             />
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
-          {(netInfo.type !== 'unknown' &&
-            netInfo.isInternetReachable === false) ||
+          {netInfo.type !== 'unknown' &&
+          netInfo.isInternetReachable === false &&
           item?.download ? (
             <Ionicons
               onPress={() => handleView(item)}
@@ -413,6 +423,11 @@ const Documents = () => {
             <ActivityIndicator />
           ) : (
             <FontAwesomeIcon
+              disabled={
+                netInfo.type !== 'unknown' &&
+                netInfo.isInternetReachable === false &&
+                !item?.download
+              }
               onPress={() => handleDownload(item)}
               style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
               type="FontAwesone"
