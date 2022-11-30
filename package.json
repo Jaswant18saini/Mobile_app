@@ -9,6 +9,10 @@
         "test": "jest",
         "lint": "eslint ."
     },
+    "sdkDependencies": {
+        "SalesforceMobileSDK-Android": "https://github.com/forcedotcom/SalesforceMobileSDK-Android.git#v10.2.0",
+        "SalesforceMobileSDK-iOS": "https://github.com/forcedotcom/SalesforceMobileSDK-iOS.git#v10.2.0"
+    },
     "dependencies": {
         "@react-native-async-storage/async-storage": "^1.17.10",
         "@react-native-community/netinfo": "^9.3.5",
@@ -23,6 +27,7 @@
         "react-native": "0.70.3",
         "react-native-create-thumbnail": "^1.6.3",
         "react-native-fs": "^2.20.0",
+        "react-native-force": "git+https://github.com/forcedotcom/SalesforceMobileSDK-ReactNative.git#v10.2.0",
         "react-native-gesture-handler": "^2.7.1",
         "react-native-pdf-thumbnail": "^1.1.0",
         "react-native-pspdfkit": "github:PSPDFKit/react-native",
@@ -38,7 +43,8 @@
         "eslint": "^7.32.0",
         "jest": "^26.6.3",
         "metro-react-native-babel-preset": "0.72.3",
-        "react-test-renderer": "18.1.0"
+        "react-test-renderer": "18.1.0",
+        "typescript": "^4.8.3"
     },
     "jest": {
         "preset": "react-native"

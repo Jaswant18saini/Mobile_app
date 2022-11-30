@@ -408,9 +408,7 @@ const Documents = () => {
             />
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
-          {netInfo.type !== 'unknown' &&
-          netInfo.isInternetReachable === false &&
-          item?.download ? (
+          {item?.download ? (
             <Ionicons
               onPress={() => handleView(item)}
               style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
@@ -453,6 +451,8 @@ const Documents = () => {
               handleDownload(item);
             }}
           /> */}
+          {/* netInfo.type !== 'unknown' &&
+          netInfo.isInternetReachable === false && */}
         </View>
       </ScrollView>
     );
