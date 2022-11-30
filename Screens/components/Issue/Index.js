@@ -4,10 +4,8 @@ import {oauth, net} from 'react-native-force';
 
 const Issue = () => {
   const [data, setData] = useState([]);
-
+  console.log('Rum Pleaseeeee', oauth);
   useEffect(() => {
-    console.log('Rum Pleaseeeee', oauth);
-
     oauth.getAuthCredentials(
       () => fetchData(), // already logged in
       () => {
