@@ -1,14 +1,13 @@
 import React, {useEffect, useState} from 'react';
 import {StyleSheet, Text, View, FlatList} from 'react-native';
-import {createStackNavigator} from '@react-navigation/stack';
 import {oauth, net} from 'react-native-force';
 
-const ContactListScreen = () => {
+const Issue = () => {
   const [data, setData] = useState([]);
 
-  console.log('Rum Please', oauth);
-
   useEffect(() => {
+    console.log('Rum Pleaseeeee', oauth);
+
     oauth.getAuthCredentials(
       () => fetchData(), // already logged in
       () => {
@@ -36,6 +35,7 @@ const ContactListScreen = () => {
     </View>
   );
 };
+export default Issue;
 
 const styles = StyleSheet.create({
   container: {
@@ -49,17 +49,3 @@ const styles = StyleSheet.create({
     height: 44,
   },
 });
-
-const Stack = createStackNavigator();
-
-const Issue = () => {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen
-        name="Mobile SDK Sample App"
-        component={ContactListScreen}
-      />
-    </Stack.Navigator>
-  );
-};
-export default Issue;
