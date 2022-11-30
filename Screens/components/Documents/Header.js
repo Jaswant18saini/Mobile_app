@@ -1,19 +1,37 @@
-import React from 'react';
-import {
-  StyleSheet,
-  View,
-  Text,
-  Linking,
-  Image,
-  TextStyle,
-  ViewStyle,
-  TouchableHighlight,
-} from 'react-native';
+import React, {useState} from 'react';
+import {StyleSheet, View, Text, Linking} from 'react-native';
 import {Header as HeaderRNE, HeaderProps, Icon} from '@rneui/themed';
 import {create} from 'apisauce';
 import {TouchableOpacity} from 'react-native-gesture-handler';
+import {Dropdown} from 'react-native-element-dropdown';
+import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const Header = props => {
+  const data = [
+    {label: 'Test Project 1', value: '1'},
+    {label: 'Test Project 2', value: '2'},
+    {label: 'Test Project 3', value: '3'},
+    {label: 'Test Project 4', value: '4'},
+    {label: 'Test Project 5', value: '5'},
+    {label: 'Test Project 6', value: '6'},
+    {label: 'Test Project 7', value: '7'},
+    {label: 'Test Project 8', value: '8'},
+  ];
+
+  const [value, setValue] = useState(null);
+  const [isFocus, setIsFocus] = useState(false);
+
+  const renderLabel = () => {
+    if (value || isFocus) {
+      return (
+        <Text style={[styles.label, isFocus && {color: 'blue'}]}>
+          Dropdown label
+        </Text>
+      );
+    }
+    return null;
+  };
+
   const docsNavigate = () => {
     Linking.openURL(`https://reactnativeelements.com/docs/${props.view}`);
     console.log('On login click');
@@ -44,8 +62,41 @@ const Header = props => {
             <View>
               <Text style={styles.titleText}>Documents</Text>
             </View>
-            <View>
-              <Text style={styles.titleText}>Training Project</Text>
+            {/* <View>
+             <Text style={styles.titleText}>Training Project</Text> 
+              <Dropdown label="Select Project" data={data} />
+            </View> */}
+            <View style={styles.container}>
+              {renderLabel()}
+              <Dropdown
+                style={[styles.dropdown, isFocus && {borderColor: 'blue'}]}
+                placeholderStyle={styles.placeholderStyle}
+                selectedTextStyle={styles.selectedTextStyle}
+                inputSearchStyle={styles.inputSearchStyle}
+                iconStyle={styles.iconStyle}
+                data={data}
+                search
+                maxHeight={300}
+                labelField="label"
+                valueField="value"
+                placeholder={!isFocus ? 'Select item' : '...'}
+                searchPlaceholder="Search..."
+                value={value}
+                onFocus={() => setIsFocus(true)}
+                onBlur={() => setIsFocus(false)}
+                onChange={item => {
+                  setValue(item.value);
+                  setIsFocus(false);
+                }}
+                renderLeftIcon={() => (
+                  <AntDesign
+                    style={styles.icon}
+                    color={isFocus ? 'blue' : 'black'}
+                    name="Safety"
+                    size={20}
+                  />
+                )}
+              />
             </View>
           </View>
         </>
@@ -88,6 +139,44 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#fff',
     marginHorizontal: 10,
+  },
+
+  container: {
+    backgroundColor: 'white',
+    padding: 16,
+  },
+  dropdown: {
+    height: 50,
+    borderColor: 'gray',
+    borderWidth: 0.5,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+  },
+  icon: {
+    marginRight: 5,
+  },
+  label: {
+    position: 'absolute',
+    backgroundColor: 'white',
+    left: 22,
+    top: 8,
+    zIndex: 999,
+    paddingHorizontal: 8,
+    fontSize: 14,
+  },
+  placeholderStyle: {
+    fontSize: 16,
+  },
+  selectedTextStyle: {
+    fontSize: 16,
+  },
+  iconStyle: {
+    width: 20,
+    height: 20,
+  },
+  inputSearchStyle: {
+    height: 40,
+    fontSize: 16,
   },
 });
 
