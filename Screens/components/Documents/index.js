@@ -31,6 +31,46 @@ const Documents = () => {
   const [loaderForDownload, setLoaderForDownload] = useState(false);
   const [selectedfolder, setSelectedFolder] = useState(null);
 
+  const data = [
+    {label: 'Test Project 1', value: 'a0f0r000000vIrEAAU'},
+    {label: 'Test Project 2', value: '1'},
+    {label: 'Test Project 3', value: '2'},
+    {label: 'Test Project 4', value: '3'},
+    {label: 'Test Project 5', value: '4'},
+    {label: 'Test Project 6', value: '5'},
+    {label: 'Test Project 7', value: '6'},
+    {label: 'Test Project 8', value: '7'},
+  ];
+  const [selectedProjectId, setSelectedProjectId] =
+    useState('a0f0r000000vIrEAAU');
+  const [projectOptions, setProjectOptions] = useState(data);
+
+  async function current_folder_options() {
+    const data = 'token';
+    const token = data;
+
+    await axios
+      .get(
+        `${fetchUrl}/get_all_project?token=${token}&instanceUrl=${instanceUrl}`,
+      )
+      .then(res => {
+        if (res?.status === 200) {
+          let ProjectOptions = [];
+
+          res?.data?.records?.map(val => {
+            ProjectOptions.push({
+              Id: val?.Id,
+              Name: val?.Name,
+            });
+          });
+          setProjectOptions(ProjectOptions);
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  }
+
   const netInfo = useNetInfo();
 
   const api = create({
@@ -41,7 +81,7 @@ const Documents = () => {
   function Allfolder() {
     setLoading(true);
     api
-      .get('/folder?projectId=a0f0r000000vIrEAAU')
+      .get(`/folder?projectId=${selectedProjectId}`)
       .then(async res => {
         setLoading(false);
         setParentFolder(res?.data?.tree?.children);
@@ -57,6 +97,7 @@ const Documents = () => {
 
   useEffect(() => {
     Allfolder();
+    // current_folder_options();
   }, []);
   const checkNet = async () => {
     const value = await AsyncStorage.getItem('AllFolders');
@@ -465,7 +506,11 @@ const Documents = () => {
       ) : (
         <>
           <View>
-            <Header />
+            <Header
+              dropdownData={projectOptions}
+              selectedProjectId={selectedProjectId}
+              setSelectedProjectId={setSelectedProjectId}
+            />
             <View>
               <FlatList
                 style={styles.button}
