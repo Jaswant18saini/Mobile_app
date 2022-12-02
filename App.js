@@ -11,12 +11,19 @@ import Sync from './Screens/components/Sync';
 import DialyLogs from './Screens/components/Dialy-logs';
 import More from './Screens/components/More';
 import Documents from './Screens/components/Documents';
-import {Text, View} from 'react-native';
+import {Text, View, Linking} from 'react-native';
 import Login from './Screens/components/Login';
+import {useEffect} from 'react';
 
 function App() {
   const Tab = createBottomTabNavigator();
   const netInfo = useNetInfo();
+
+  useEffect(() => {
+    const linkvar = Linking.getInitialURL();
+
+    console.log('linkvar', linkvar);
+  }, []);
   return (
     <NavigationContainer>
       <SafeAreaProvider>
