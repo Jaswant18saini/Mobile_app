@@ -7,22 +7,11 @@ import {Dropdown} from 'react-native-element-dropdown';
 import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const Header = props => {
-  const data = [
-    {label: 'Test Project 1', value: '1'},
-    {label: 'Test Project 2', value: '2'},
-    {label: 'Test Project 3', value: '3'},
-    {label: 'Test Project 4', value: '4'},
-    {label: 'Test Project 5', value: '5'},
-    {label: 'Test Project 6', value: '6'},
-    {label: 'Test Project 7', value: '7'},
-    {label: 'Test Project 8', value: '8'},
-  ];
-
-  const [value, setValue] = useState(null);
   const [isFocus, setIsFocus] = useState(false);
+  const {selectedProjectId, setSelectedProjectId} = props;
 
   const renderLabel = () => {
-    if (value || isFocus) {
+    if (isFocus) {
       return (
         <Text style={[styles.label, isFocus && {color: 'blue'}]}>
           Dropdown label
@@ -31,7 +20,7 @@ const Header = props => {
     }
     return null;
   };
-
+  console.log('selectedProjectId', selectedProjectId);
   const docsNavigate = () => {
     Linking.openURL(`https://reactnativeelements.com/docs/${props.view}`);
     console.log('On login click');
@@ -74,28 +63,28 @@ const Header = props => {
                 selectedTextStyle={styles.selectedTextStyle}
                 inputSearchStyle={styles.inputSearchStyle}
                 iconStyle={styles.iconStyle}
-                data={data}
+                data={props.dropdownData}
                 search
                 maxHeight={300}
                 labelField="label"
                 valueField="value"
                 placeholder={!isFocus ? 'Select item' : '...'}
                 searchPlaceholder="Search..."
-                value={value}
+                value={selectedProjectId}
                 onFocus={() => setIsFocus(true)}
                 onBlur={() => setIsFocus(false)}
                 onChange={item => {
-                  setValue(item.value);
                   setIsFocus(false);
+                  setSelectedProjectId(item.value);
                 }}
-                renderLeftIcon={() => (
-                  <AntDesign
-                    style={styles.icon}
-                    color={isFocus ? 'blue' : 'black'}
-                    name="Safety"
-                    size={20}
-                  />
-                )}
+                // renderLeftIcon={() => (
+                //   <AntDesign
+                //     style={styles.icon}
+                //     color={isFocus ? 'blue' : 'black'}
+                //     name="Safety"
+                //     size={20}
+                //   />
+                // )}
               />
             </View>
           </View>
@@ -142,6 +131,7 @@ const styles = StyleSheet.create({
   },
 
   container: {
+    width: '100%',
     backgroundColor: 'white',
     padding: 16,
   },
