@@ -21,11 +21,19 @@ function App() {
 
   useEffect(() => {
     const linkvar = Linking.getInitialURL();
-
     console.log('linkvar', linkvar);
   }, []);
+  const linking = {
+    prefixes: ["com.pspdfkitdemo://"],
+    config: {
+      screens:{
+        Documents: "documents",
+      },
+    },
+  };
+
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
       <SafeAreaProvider>
         <Tab.Navigator
           screenOptions={({route}) => ({

@@ -21,7 +21,11 @@ import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
 
-const Documents = () => {
+const Documents = (props) => {
+
+  useEffect(()=>{
+    console.log("documents",props)
+  },[props])
   const [parentFolder, setParentFolder] = useState();
   const [folderData, setFolderData] = useState();
   const [fileData, setFileData] = useState();
