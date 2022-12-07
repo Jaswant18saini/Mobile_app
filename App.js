@@ -13,6 +13,7 @@ import More from './Screens/components/More';
 import Documents from './Screens/components/Documents';
 import {Text, View, Linking, ActivityIndicator} from 'react-native';
 import Login from './Screens/components/Login';
+import Offline from './Screens/components/Offline';
 
 function App() {
   const Tab = createBottomTabNavigator();
@@ -20,8 +21,6 @@ function App() {
 
   useEffect(() => {
     const linkvar = Linking.getInitialURL();
-
-    console.log('linkvarnaagtibaaaa', linkvar);
     console.log('linkvarnaagtibaaaa', linkvar);
   }, []);
 
@@ -38,6 +37,7 @@ function App() {
     <NavigationContainer
       linking={linking}
       fallback={<ActivityIndicator color="blue" size="large" />}>
+
       <SafeAreaProvider>
         <Tab.Navigator
           screenOptions={({route}) => ({
@@ -65,6 +65,8 @@ function App() {
                   : 'md-ellipsis-horizontal-circle-outline';
               } else if (route.name === 'Login') {
                 iconName = focused ? 'log-in' : 'log-in-outline';
+              } else if (route.name === 'Offline Files') {
+                iconName = focused ? 'log-in' : 'log-in-outline';
               }
 
               // You can return any component that you like here!
@@ -81,6 +83,7 @@ function App() {
           <Tab.Screen name="Sync" component={Sync} />
           <Tab.Screen name="Daily-logs" component={DialyLogs} />
           <Tab.Screen name="More" component={More} />
+          <Tab.Screen name="Offline Files" component={Offline} />
         </Tab.Navigator>
         {netInfo.type !== 'unknown' && netInfo.isInternetReachable === false ? (
           <View style={{alignItems: 'center'}}>

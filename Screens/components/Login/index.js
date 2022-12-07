@@ -22,6 +22,7 @@ const Login = () => {
   };
   const AUTH_URL =
     'https://login.salesforce.com/services/oauth2/authorize?response_type=token&client_id=3MVG9wt4IL4O5wvKO2JUZnYYNyI7XJuNh_ZPFmHs1gHytxLtJq3t.tqpfDC8_rlXh50Xngz0R9xBR_HhMZwat&redirect_uri=http://localhost:3002';
+
   return (
     <View style={{flex: 1, paddingTop: 25}}>
       {!token && AUTH_URL && (
