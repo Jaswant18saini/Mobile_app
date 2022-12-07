@@ -46,8 +46,9 @@ const Documents = () => {
   const [projectOptions, setProjectOptions] = useState(data);
 
   async function current_folder_options() {
-    const data = 'token';
-    const token = data;
+    const token = await AsyncStorage.getItem('Token');
+
+    console.log('Token', token);
 
     await axios
       .get(
@@ -97,7 +98,7 @@ const Documents = () => {
 
   useEffect(() => {
     Allfolder();
-    // current_folder_options();
+    current_folder_options();
   }, []);
   const checkNet = async () => {
     const value = await AsyncStorage.getItem('AllFolders');
