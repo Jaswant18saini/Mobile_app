@@ -21,11 +21,10 @@ import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
 
-const Documents = (props) => {
-
-  useEffect(()=>{
-    console.log("documents",props)
-  },[props])
+const Documents = props => {
+  useEffect(() => {
+    console.log('documents', props);
+  }, [props]);
   const [parentFolder, setParentFolder] = useState();
   const [folderData, setFolderData] = useState();
   const [fileData, setFileData] = useState();
@@ -194,7 +193,7 @@ const Documents = (props) => {
     setLoaderForDownload(true);
     RNFS.downloadFile({
       fromUrl: val?.url,
-      toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}.pdf`,
+      toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}_pspdf.pdf`,
     })
       .promise.then(r => {
         const updatedData = fileData?.map((valu, index) => {
@@ -580,7 +579,7 @@ const Documents = (props) => {
   );
 };
 
-const styles = StyleSheet.create({
+export const styles = StyleSheet.create({
   container: {
     backgroundColor: '#e7ecf0',
     flex: 1,

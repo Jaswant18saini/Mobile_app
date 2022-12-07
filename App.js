@@ -14,6 +14,7 @@ import Documents from './Screens/components/Documents';
 import {Text, View, Linking} from 'react-native';
 import Login from './Screens/components/Login';
 import {useEffect} from 'react';
+import Offline from './Screens/components/Offline';
 
 function App() {
   const Tab = createBottomTabNavigator();
@@ -24,10 +25,10 @@ function App() {
     console.log('linkvar', linkvar);
   }, []);
   const linking = {
-    prefixes: ["com.pspdfkitdemo://"],
+    prefixes: ['com.pspdfkitdemo://'],
     config: {
-      screens:{
-        Documents: "documents",
+      screens: {
+        Documents: 'documents',
       },
     },
   };
@@ -61,6 +62,8 @@ function App() {
                   : 'md-ellipsis-horizontal-circle-outline';
               } else if (route.name === 'Login') {
                 iconName = focused ? 'log-in' : 'log-in-outline';
+              } else if (route.name === 'Offline Files') {
+                iconName = focused ? 'log-in' : 'log-in-outline';
               }
 
               // You can return any component that you like here!
@@ -77,6 +80,7 @@ function App() {
           <Tab.Screen name="Sync" component={Sync} />
           <Tab.Screen name="Daily-logs" component={DialyLogs} />
           <Tab.Screen name="More" component={More} />
+          <Tab.Screen name="Offline Files" component={Offline} />
         </Tab.Navigator>
         {netInfo.type !== 'unknown' && netInfo.isInternetReachable === false ? (
           <View style={{alignItems: 'center'}}>
