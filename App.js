@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React, {useEffect} from 'react';
 import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
@@ -11,9 +11,8 @@ import Sync from './Screens/components/Sync';
 import DialyLogs from './Screens/components/Dialy-logs';
 import More from './Screens/components/More';
 import Documents from './Screens/components/Documents';
-import {Text, View, Linking} from 'react-native';
+import {Text, View, Linking, ActivityIndicator} from 'react-native';
 import Login from './Screens/components/Login';
-import {useEffect} from 'react';
 import Offline from './Screens/components/Offline';
 
 function App() {
@@ -22,19 +21,23 @@ function App() {
 
   useEffect(() => {
     const linkvar = Linking.getInitialURL();
-    console.log('linkvar', linkvar);
+    console.log('linkvarnaagtibaaaa', linkvar);
   }, []);
+
   const linking = {
     prefixes: ['com.pspdfkitdemo://'],
     config: {
       screens: {
-        Documents: 'documents',
+        Sync: 'oauth',
       },
     },
   };
 
   return (
-    <NavigationContainer linking={linking} fallback={<Text>Loading...</Text>}>
+    <NavigationContainer
+      linking={linking}
+      fallback={<ActivityIndicator color="blue" size="large" />}>
+
       <SafeAreaProvider>
         <Tab.Navigator
           screenOptions={({route}) => ({
