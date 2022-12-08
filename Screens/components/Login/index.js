@@ -15,7 +15,7 @@ const Login = () => {
       const loginInfo = querystring.parse(event.url.split('#')[1]);
       if (loginInfo?.access_token) {
         setToken(loginInfo?.access_token);
-        AsyncStorage.setItem('Token', loginInfo?.access_token);
+        AsyncStorage.setItem('loginInfo', JSON.stringify(loginInfo));
         navigation.navigate('Documents');
       }
     }
