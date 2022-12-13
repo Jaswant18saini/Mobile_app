@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {Image, Text, ActivityIndicator} from 'react-native';
+import {Image, ActivityIndicator} from 'react-native';
 import PdfThumbnail from 'react-native-pdf-thumbnail';
 import RNFS from 'react-native-fs';
 import {TouchableHighlight} from 'react-native';
