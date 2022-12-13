@@ -21,10 +21,7 @@ import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
 
-const Documents = props => {
-  useEffect(() => {
-    console.log('documents', props);
-  }, [props]);
+const Documents = ({navigation, ...props}) => {
   const [parentFolder, setParentFolder] = useState();
   const [folderData, setFolderData] = useState();
   const [fileData, setFileData] = useState();
@@ -34,37 +31,46 @@ const Documents = props => {
   const [loaderForDownload, setLoaderForDownload] = useState(false);
   const [selectedfolder, setSelectedFolder] = useState(null);
 
-  const data = [
-    {label: 'Test Project 1', value: 'a0f0r000000vIrEAAU'},
-    {label: 'Test Project 2', value: '1'},
-    {label: 'Test Project 3', value: '2'},
-    {label: 'Test Project 4', value: '3'},
-    {label: 'Test Project 5', value: '4'},
-    {label: 'Test Project 6', value: '5'},
-    {label: 'Test Project 7', value: '6'},
-    {label: 'Test Project 8', value: '7'},
-  ];
   const [selectedProjectId, setSelectedProjectId] =
     useState('a0f0r000000vIrEAAU');
-  const [projectOptions, setProjectOptions] = useState(data);
+  const [projectOptions, setProjectOptions] = useState([]);
 
-  async function current_folder_options() {
-    const token = await AsyncStorage.getItem('Token');
-
-    console.log('Token', token);
-
-    await axios
-      .get(
-        `${fetchUrl}/get_all_project?token=${token}&instanceUrl=${instanceUrl}`,
-      )
+  const api = create({
+    baseURL: 'http://34.231.129.177',
+    headers: {Accept: 'application/json'},
+  });
+  console.log('projectOptions', projectOptions);
+  const GetToken = async () => {
+    return await api
+      .get('/get_accesss_token')
       .then(res => {
         if (res?.status === 200) {
-          let ProjectOptions = [];
+          return res;
+        }
+      })
+      .catch(err => {
+        console.log(err);
+      });
+  };
 
+  async function current_folder_options(loginInfo) {
+    const LoginInfo = JSON.parse(loginInfo);
+    console.log('LoginInfo>llllllllllllllllllllll', LoginInfo);
+    await api
+      .get(
+        `/get_all_project?token=${LoginInfo.access_token}&instanceUrl=${LoginInfo.instance_url}`,
+      )
+      .then(res => {
+        console.log('ccccc', res);
+        if (res?.status === 200) {
+          let ProjectOptions = [];
+          console.log(
+            'ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt',
+          );
           res?.data?.records?.map(val => {
             ProjectOptions.push({
-              Id: val?.Id,
-              Name: val?.Name,
+              value: val?.Id,
+              label: val?.Name,
             });
           });
           setProjectOptions(ProjectOptions);
@@ -77,12 +83,8 @@ const Documents = props => {
 
   const netInfo = useNetInfo();
 
-  const api = create({
-    baseURL: 'http://34.231.129.177',
-    headers: {Accept: 'application/json'},
-  });
-
   function Allfolder() {
+    console.log('newwwwwwwwww', selectedProjectId);
     setLoading(true);
     api
       .get(`/folder?projectId=${selectedProjectId}`)
@@ -98,11 +100,22 @@ const Documents = props => {
         setLoading(false);
       });
   }
-
+  const getLoginInfo = async () => {
+    const loginInfo = await AsyncStorage.getItem('loginInfo');
+    return loginInfo;
+  };
   useEffect(() => {
-    Allfolder();
-    current_folder_options();
-  }, []);
+    console.log('documents', props);
+
+    const unsubscribe = navigation.addListener('focus', () => {
+      Allfolder();
+      getLoginInfo().then(res => {
+        current_folder_options(res);
+      });
+    });
+    return unsubscribe;
+  }, [props, selectedProjectId]);
+
   const checkNet = async () => {
     const value = await AsyncStorage.getItem('AllFolders');
     console.log('itemmm', value);
