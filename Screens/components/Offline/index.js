@@ -19,6 +19,7 @@ import {compact} from 'lodash';
 import {styles} from '../Documents';
 import {useNetInfo} from '@react-native-community/netinfo';
 import {useRoute} from '@react-navigation/native';
+import {PdfThumbnailImage} from '../../common/PdfThumbnailImage';
 
 const Offline = ({navigation}) => {
   const [fileData, setFileData] = useState([]);
@@ -34,7 +35,6 @@ const Offline = ({navigation}) => {
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, []);
-  console.log('fileData', fileData);
   var PSPDFKit = NativeModules.PSPDFKit;
 
   function _downloadedFiles() {
@@ -46,7 +46,6 @@ const Offline = ({navigation}) => {
         try {
           const value = await AsyncStorage.getItem('FoldersFiles');
           item = JSON.parse(value);
-          // console.log(datafromstorage)
           const updatedData = item?.map((val, index) => {
             const filedata = datafromstorage?.find(data =>
               data?.name.includes(val?.Id),
@@ -70,37 +69,16 @@ const Offline = ({navigation}) => {
 
   const handleView = val => {
     setCurrentFile(val);
-    if (!val?.download && netInfo.isInternetReachable === true) {
-      setLoader(true);
-      const result = Math.random().toString(36).substring(2, 7);
-      RNFS.downloadFile({
-        fromUrl: val?.url,
-        toFile: `${RNFS.DocumentDirectoryPath}/${result}.pdf`,
-      }).promise.then(r => {
-        const documentNew =
-          Platform.OS === 'ios'
-            ? `${RNFS.DocumentDirectoryPath}/${result}.pdf`
-            : `file://${RNFS.DocumentDirectoryPath}/${result}.pdf`;
-        setLoader(false);
-        PSPDFKit.present(documentNew, {
-          showThumbnailBar: 'scrollable',
-          pageTransition: 'scrollContinuous',
-          scrollDirection: 'vertical',
-          documentLabelEnabled: true,
-        });
-      });
-    } else {
-      const documentNew =
-        Platform.OS === 'ios'
-          ? `${RNFS.DocumentDirectoryPath}/${val?.id}.pdf`
-          : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`;
-      PSPDFKit.present(documentNew, {
-        showThumbnailBar: 'scrollable',
-        pageTransition: 'scrollContinuous',
-        scrollDirection: 'vertical',
-        documentLabelEnabled: true,
-      });
-    }
+    const documentNew =
+      Platform.OS === 'ios'
+        ? `${RNFS.DocumentDirectoryPath}/${val?.id}.pdf`
+        : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}_pspdf.pdf`;
+    PSPDFKit.present(documentNew, {
+      showThumbnailBar: 'scrollable',
+      pageTransition: 'scrollContinuous',
+      scrollDirection: 'vertical',
+      documentLabelEnabled: true,
+    });
   };
 
   const FilesView = ({item}) => {
@@ -118,26 +96,9 @@ const Offline = ({navigation}) => {
           onPress={() => handleView(item)}>
           <View style={styles.Boxwrapper}>
             <TouchableOpacity>
-              <Image
-                source={data?.image}
-                style={[
-                  {
-                    width: '10%',
-                    height: 15,
-                    marginLeft: 'auto',
-                    marginRight: 'auto',
-                    flexWrap: 'wrap',
-                    alignItems: 'center',
-                    flex: 1,
-                    justifyContent: 'center',
-                  },
-                ]}
-              />
-              <MaterialCommunityIcons
-                type="MaterialCommunityIcons"
-                name="check-underline-circle"
-                color="#1e90ff"
-                size={20}
+              <PdfThumbnailImage
+                item={item}
+                handleView={() => handleView(item)}
               />
             </TouchableOpacity>
             <Text style={[styles.textName, {fontWeight: '900', color: '#333'}]}>
