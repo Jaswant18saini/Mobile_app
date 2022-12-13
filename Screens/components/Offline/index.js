@@ -4,14 +4,15 @@ import {
   Text,
   FlatList,
   ScrollView,
+  View,
   RefreshControl,
   Image,
   NativeModules,
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import {View} from 'react-native';
+import AntDesignIcon from 'react-native-vector-icons/AntDesign';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RNFS from 'react-native-fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {compact} from 'lodash';
@@ -103,6 +104,16 @@ const Offline = ({navigation}) => {
             <Text style={[styles.textName, {fontWeight: '900', color: '#333'}]}>
               {item?.Name}
             </Text>
+            <Text>V1</Text>
+            <Text style={[styles.textName, {fontWeight: '400', color: '#333'}]}>
+              {item?.Name}
+            </Text>
+            <AntDesignIcon
+              type="AntDesign"
+              name="ellipsis1"
+              color="#808080"
+              size={40}
+            />
           </View>
         </TouchableWithoutFeedback>
         {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
@@ -117,7 +128,7 @@ const Offline = ({navigation}) => {
       ) : (
         <FlatList
           data={fileData}
-          numColumns={4}
+          numColumns={2}
           horizontal={false}
           renderItem={FilesView}
           keyExtractor={item => item.Id}
