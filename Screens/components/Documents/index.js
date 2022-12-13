@@ -20,6 +20,7 @@ import Header from './Header';
 import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
+import { PdfThumbnailImage } from '../../comman/PdfThumbnailImage';
 
 const Documents = ({navigation, ...props}) => {
   const [parentFolder, setParentFolder] = useState();
@@ -465,6 +466,9 @@ const Documents = ({navigation, ...props}) => {
               ]}
             />
           </TouchableHighlight>
+
+          <PdfThumbnailImage item={item} />
+
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
             <Ionicons
