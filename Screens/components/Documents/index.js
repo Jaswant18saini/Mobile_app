@@ -31,8 +31,8 @@ const Documents = ({navigation, ...props}) => {
   const [loaderForDownload, setLoaderForDownload] = useState(false);
   const [selectedfolder, setSelectedFolder] = useState(null);
 
-  const [selectedProjectId, setSelectedProjectId] =
-    useState('a0f0r000000vIrEAAU');
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  //a0f0r000000vIrEAAU
   const [projectOptions, setProjectOptions] = useState([]);
 
   const api = create({
@@ -108,13 +108,17 @@ const Documents = ({navigation, ...props}) => {
     console.log('documents', props);
 
     const unsubscribe = navigation.addListener('focus', () => {
-      Allfolder();
       getLoginInfo().then(res => {
         current_folder_options(res);
+        Allfolder();
       });
     });
     return unsubscribe;
-  }, [props, selectedProjectId]);
+  }, [props]);
+
+  useEffect(() => {
+    Allfolder();
+  }, [selectedProjectId]);
 
   const checkNet = async () => {
     const value = await AsyncStorage.getItem('AllFolders');
@@ -465,6 +469,7 @@ const Documents = ({navigation, ...props}) => {
               ]}
             />
           </TouchableHighlight>
+
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
             <Ionicons
