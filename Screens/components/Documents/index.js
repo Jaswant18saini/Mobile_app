@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   TouchableHighlight,
   TouchableWithoutFeedback,
+  BackHandler
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {create} from 'apisauce';
@@ -20,6 +21,7 @@ import Header from './Header';
 import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
+import PSPDFKitView from 'react-native-pspdfkit';
 
 const Documents = ({navigation, ...props}) => {
   const [parentFolder, setParentFolder] = useState();
@@ -30,6 +32,9 @@ const Documents = ({navigation, ...props}) => {
   const [loading, setLoading] = useState(false);
   const [loaderForDownload, setLoaderForDownload] = useState(false);
   const [selectedfolder, setSelectedFolder] = useState(null);
+
+  const [fileToLoad, setFileToLoad] = useState(null);
+  const docViewerRef = React.createRef(null);
 
   const [selectedProjectId, setSelectedProjectId] =
     useState('a0f0r000000vIrEAAU');
@@ -131,6 +136,25 @@ const Documents = ({navigation, ...props}) => {
       Allfolder();
     }
   }, [netInfo.type, netInfo.isInternetReachable]);
+
+
+  // handle back button
+  useEffect(() => {
+    const backAction = () => {
+      console.log('handle back button');
+      setFileToLoad(null);
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener(
+      "hardwareBackPress",
+      backAction
+    );
+
+    return () => backHandler.remove();
+  }, []);
+
+
   var PSPDFKit = NativeModules.PSPDFKit;
 
   const get = async (data = null) => {
@@ -167,11 +191,49 @@ const Documents = ({navigation, ...props}) => {
         console.log(err.message, err.code);
       });
   };
+
+  useEffect(() => {
+    if(fileToLoad) {
+      /*if(docViewerRef?.current) {
+        console.log('doc viewer is available');
+        if (currentFile?.Instant_Json__c) {
+          //console.log("pdfMarkup >>>>>>>>>>>>", pdfopenfiledata.markupJSON);
+          let annotationList = JSON.parse(currentFile.Instant_Json__c).annotations;
+          console.log('checking annotation values::>>', annotationList);
+          const pdfMarkup = {
+            format: 'https://pspdfkit.com/instant-json/v1',
+            annotations: annotationList,
+          };
+    
+          docViewerRef.current.addAnnotations(annotationList).then(function(success) {
+            console.log('success: ' + success);
+            })
+          .catch(function(error) {
+          console.log('There has been a problem with your fetch operation: ' + JSON.stringify(error));
+          });
+          console.log('Anotations added');
+        }
+      }*/
+    } 
+  },[fileToLoad]); 
   const handleView = val => {
+    let pdfMarkup;
+    if (val?.Instant_Json__c) {
+      //console.log("pdfMarkup >>>>>>>>>>>>", pdfopenfiledata.markupJSON);
+      let annotationList = JSON.parse(val.Instant_Json__c).annotations;
+      console.log('checking annotation values::>>', annotationList);
+      pdfMarkup = {
+        format: 'https://pspdfkit.com/instant-json/v1',
+        annotations: annotationList,
+      };
+    }
     setCurrentFile(val);
+    //console.log("mark values::>>",val);
+    // console.log("checking values of files::>>", annotationList);
     if (!val?.download && netInfo.isInternetReachable === true) {
       setLoader(true);
       const result = Math.random().toString(36).substring(2, 7);
+      console.log('result is ', result);
       RNFS.downloadFile({
         fromUrl: val?.url,
         toFile: `${RNFS.DocumentDirectoryPath}/${result}.pdf`,
@@ -181,24 +243,104 @@ const Documents = ({navigation, ...props}) => {
             ? `${RNFS.DocumentDirectoryPath}/${result}.pdf`
             : `file://${RNFS.DocumentDirectoryPath}/${result}.pdf`;
         setLoader(false);
-        PSPDFKit.present(documentNew, {
-          showThumbnailBar: 'scrollable',
-          pageTransition: 'scrollContinuous',
-          scrollDirection: 'vertical',
-          documentLabelEnabled: true,
-        });
+        // PSPDFKit.addAnnotations(pdfMarkup).then(success => {
+        //   if (success) {
+        //     console.log("sucees annotiation");
+        //     // And finally, present the newly processed document with embedded annotations.
+        //     PSPDFKit.present(documentNew, {
+        //       showThumbnailBar: 'scrollable',
+        //       pageTransition: 'scrollContinuous',
+        //       scrollDirection: 'vertical',
+        //       documentLabelEnabled: true,
+
+        //     })
+        //   } else {
+        //     alert('Failed to embed annotations.');
+        //   }
+        // })
+        // .catch(error => {
+        //   alert(JSON.stringify(error));
+        // });
+
+        // view default from native module
+
+        //  PSPDFKit.present(documentNew, {
+        //   showThumbnailBar: 'scrollable',
+        //   pageTransition: 'scrollContinuous',
+        //   scrollDirection: 'vertical',
+        //   documentLabelEnabled: true,
+        // });
+
+        // view controlled
+        setFileToLoad(documentNew);
+        // console.log('open file is ', documentNew);
+        // const result2 = Math.random().toString(36).substring(2, 7);
+        // const documentProcessed =
+        //   Platform.OS === 'ios'
+        //     ? `${RNFS.DocumentDirectoryPath}/${result2}.pdf`
+        //     : `file://${RNFS.DocumentDirectoryPath}/${result2}.pdf`;
+
+        // PSPDFKit.processAnnotations('embed', 'all', documentNew, documentProcessed).then((success) => {
+        //   if(success) {
+        //     console.log('PASS:::: successfully embeded annotations');
+        //     PSPDFKit.present(processedDoc, {
+        //       showThumbnailBar: 'scrollable',
+        //       pageTransition: 'scrollContinuous',
+        //       scrollDirection: 'vertical',
+        //       documentLabelEnabled: true,
+        //     });
+        //   } else {
+        //     console.log('FAIL: Processing annotations', JSON.stringify(success));
+        //   }
+        // }).catch((error) => {
+        //   console.log('ERROR: Processing annotations::::',JSON.stringify(error.message));
+        // });
       });
     } else {
+      console.log('Test');
       const documentNew =
         Platform.OS === 'ios'
-          ? `${RNFS.DocumentDirectoryPath}/${val?.id}.pdf`
+          ? `${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`
           : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`;
       PSPDFKit.present(documentNew, {
         showThumbnailBar: 'scrollable',
         pageTransition: 'scrollContinuous',
         scrollDirection: 'vertical',
         documentLabelEnabled: true,
-      });
+      })
+        .then(success => {
+          if (success) {
+            console.log('sucees annotiation');
+            // And finally, present the newly processed document with embedded annotations.
+            PSPDFKit.addAnnotations(pdfMarkup);
+          } else {
+            // alert('Failed to embed annotations.');
+            console.log('Failed to embed annotations.');
+          }
+        })
+        .catch(error => {
+          // alert(JSON.stringify(error));
+          console.log('Failed to embed annotations.', error);
+        });
+      /*PSPDFKit.addAnnotations(pdfMarkup).then(success => {
+            if (success) {
+              console.log("sucees annotiation");
+              // And finally, present the newly processed document with embedded annotations.
+              PSPDFKit.present(documentNew, {
+                showThumbnailBar: 'scrollable',
+                pageTransition: 'scrollContinuous',
+                scrollDirection: 'vertical',
+                documentLabelEnabled: true,
+      
+                
+              })
+            } else {
+              alert('Failed to embed annotations.');
+            }
+          })
+          .catch(error => {
+            alert(JSON.stringify(error));
+          });*/
     }
   };
 
@@ -522,71 +664,169 @@ const Documents = ({navigation, ...props}) => {
         <ActivityIndicator />
       ) : (
         <>
-          <View>
-            <Header
-              dropdownData={projectOptions}
-              selectedProjectId={selectedProjectId}
-              setSelectedProjectId={setSelectedProjectId}
-            />
-            <View>
-              <FlatList
-                style={styles.button}
-                data={parentFolder}
-                renderItem={Buttons}
-                numColumns={2}
-                horizontal={false}
-                keyExtractor={item => item.value.Id}
-              />
-            </View>
-          </View>
-          <ScrollView>
-            <View>
+          {!fileToLoad && (
+            <>
               <View>
-                {selectedfolder ? <SelectedFolder /> : ''}
-                <Text style={{textAlign: 'center', marginBottom: 10}}>
-                  Folders
-                </Text>
-                <View style={styles.mainBx}>
-                  {fileData?.length === 0 ? (
-                    <ActivityIndicator />
-                  ) : (
-                    <FlatList
-                      data={folderData}
-                      numColumns={3}
-                      horizontal={false}
-                      renderItem={({item}) => <FolderView item={item} />}
-                      ItemSeparatorComponent={() => (
-                        <View style={{height: 10}} />
-                      )}
-                      keyExtractor={item => item.value.Id}
-                    />
-                  )}
+                <Header
+                  dropdownData={projectOptions}
+                  selectedProjectId={selectedProjectId}
+                  setSelectedProjectId={setSelectedProjectId}
+                />
+                <View>
+                  <FlatList
+                    style={styles.button}
+                    data={parentFolder}
+                    renderItem={Buttons}
+                    numColumns={2}
+                    horizontal={false}
+                    keyExtractor={item => item.value.Id}
+                  />
                 </View>
               </View>
-              <View style={{width: '100%', paddingHorizontal: 10}}>
-                <Text
-                  style={{
-                    textAlign: 'center',
-                    marginTop: 15,
-                    marginBottom: 10,
-                  }}>
-                  Documents
-                </Text>
+              <ScrollView>
+                <View>
+                  <View>
+                    {selectedfolder ? <SelectedFolder /> : ''}
+                    <Text style={{textAlign: 'center', marginBottom: 10}}>
+                      Folders
+                    </Text>
+                    <View style={styles.mainBx}>
+                      {fileData?.length === 0 ? (
+                        <ActivityIndicator />
+                      ) : (
+                        <FlatList
+                          data={folderData}
+                          numColumns={3}
+                          horizontal={false}
+                          renderItem={({item}) => <FolderView item={item} />}
+                          ItemSeparatorComponent={() => (
+                            <View style={{height: 10}} />
+                          )}
+                          keyExtractor={item => item.value.Id}
+                        />
+                      )}
+                    </View>
+                  </View>
+                  <View style={{width: '100%', paddingHorizontal: 10}}>
+                    <Text
+                      style={{
+                        textAlign: 'center',
+                        marginTop: 15,
+                        marginBottom: 10,
+                      }}>
+                      Documents
+                    </Text>
 
-                {fileData?.length === 0 ? (
-                  <ActivityIndicator />
-                ) : (
-                  <FlatList
-                    data={fileData}
-                    numColumns={4}
-                    horizontal={false}
-                    renderItem={FilesView}
-                    keyExtractor={item => item.Id}
-                  />
-                )}
-              </View>
+                    {fileData?.length === 0 ? (
+                      <ActivityIndicator />
+                    ) : (
+                      <FlatList
+                        data={fileData}
+                        numColumns={4}
+                        horizontal={false}
+                        renderItem={FilesView}
+                        keyExtractor={item => item.Id}
+                      />
+                    )}
+                  </View>
+                </View>
+              </ScrollView>
+            </>
+          )}
+
+          {/* view controlled */}
+          {fileToLoad && (
+            <View style={{ flex: 1}} >
+            <PSPDFKitView
+              document={fileToLoad}
+              ref={docViewerRef}
+              fragmentTag="PDF1"
+              style={{flex: 1}}
+            />
+            <View style={ {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 5,
+  } }>
+              <Button
+                onPress={() => {
+                  // Programmatically add an ink annotation.
+                  /* const annotationJSON = {
+                    bbox: [
+                      89.586334228515625, 98.5791015625, 143.12948608398438,
+                      207.1583251953125,
+                    ],
+                    isDrawnNaturally: false,
+                    lineWidth: 5,
+                    lines: {
+                      intensities: [
+                        [0.5, 0.5, 0.5],
+                        [0.5, 0.5, 0.5],
+                      ],
+                      points: [
+                        [
+                          [92.086334228515625, 101.07916259765625],
+                          [92.086334228515625, 202.15826416015625],
+                          [138.12950134277344, 303.2374267578125],
+                        ],
+                        [
+                          [184.17266845703125, 101.07916259765625],
+                          [184.17266845703125, 202.15826416015625],
+                          [230.2158203125, 303.2374267578125],
+                        ],
+                      ],
+                    },
+                    opacity: 1,
+                    pageIndex: 0,
+                    name: 'A167811E-6D10-4546-A147-B7AD775FE8AC',
+                    strokeColor: '#AA47BE',
+                    type: 'pspdfkit/ink',
+                    v: 1,
+                  }; */
+                  if (currentFile?.Instant_Json__c) {
+                    //console.log("pdfMarkup >>>>>>>>>>>>", pdfopenfiledata.markupJSON);
+                    let annotationList = JSON.parse(currentFile.Instant_Json__c).annotations;
+                    console.log('checking annotation values::>>', annotationList);
+                    const pdfMarkup = {
+                      format: 'https://pspdfkit.com/instant-json/v1',
+                      annotations: annotationList,
+                    };
+
+                    docViewerRef.current
+                    .addAnnotations(pdfMarkup)
+                    .then(result => {
+                      if (result) {
+                        alert('Annotation was successfully added.');
+                      } else {
+                        alert('Failed to add annotation.');
+                      }
+                    })
+                    .catch(error => {
+                      alert(JSON.stringify(error));
+                    });
+              
+                    
+                  }
+                  /*docViewerRef.current
+                    .addAnnotation(annotationJSON)
+                    .then(result => {
+                      if (result) {
+                        alert('Annotation was successfully added.');
+                      } else {
+                        alert('Failed to add annotation.');
+                      }
+                    })
+                    .catch(error => {
+                      alert(JSON.stringify(error));
+                    });*/
+                }}
+                title="Show Markup"
+                accessibilityLabel="Add Ink Annotation"
+              />
+             
             </View>
-          </ScrollView>
+            </View>
+          )}
         </>
       )}
     </>
@@ -594,6 +834,9 @@ const Documents = ({navigation, ...props}) => {
 };
 
 export const styles = StyleSheet.create({
+
+
+
   container: {
     backgroundColor: '#e7ecf0',
     flex: 1,

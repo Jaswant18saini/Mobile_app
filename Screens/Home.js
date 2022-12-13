@@ -25,10 +25,6 @@ const Home = ({navigation}) => {
 
   const ref1 = useRef();
   var PSPDFKit = NativeModules.PSPDFKit;
-  const DOCUMENT =
-	Platform.OS === 'ios'
-		? 'Document.pdf'
-		: 'file:///android_asset/Document.pdf';
 
   const handlePress = id => {};
   useEffect(() => {
@@ -109,7 +105,6 @@ const Home = ({navigation}) => {
     <View>
       <ScrollView>
         <View>
-        
           {folder?.map(person => {
             return (
               <View key={person.Id}>
