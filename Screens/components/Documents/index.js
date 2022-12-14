@@ -39,7 +39,6 @@ const Documents = ({navigation, ...props}) => {
     baseURL: 'http://34.231.129.177',
     headers: {Accept: 'application/json'},
   });
-  console.log('projectOptions', projectOptions);
   const GetToken = async () => {
     return await api
       .get('/get_accesss_token')
@@ -55,18 +54,13 @@ const Documents = ({navigation, ...props}) => {
 
   async function current_folder_options(loginInfo) {
     const LoginInfo = JSON.parse(loginInfo);
-    console.log('LoginInfo>llllllllllllllllllllll', LoginInfo);
     await api
       .get(
         `/get_all_project?token=${LoginInfo.access_token}&instanceUrl=${LoginInfo.instance_url}`,
       )
       .then(res => {
-        console.log('ccccc', res);
         if (res?.status === 200) {
           let ProjectOptions = [];
-          console.log(
-            'ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt',
-          );
           res?.data?.records?.map(val => {
             ProjectOptions.push({
               value: val?.Id,
@@ -84,7 +78,6 @@ const Documents = ({navigation, ...props}) => {
   const netInfo = useNetInfo();
 
   function Allfolder() {
-    console.log('newwwwwwwwww', selectedProjectId);
     setLoading(true);
     api
       .get(`/folder?projectId=${selectedProjectId}`)
@@ -105,8 +98,6 @@ const Documents = ({navigation, ...props}) => {
     return loginInfo;
   };
   useEffect(() => {
-    console.log('documents', props);
-
     const unsubscribe = navigation.addListener('focus', () => {
       getLoginInfo().then(res => {
         current_folder_options(res);
@@ -122,9 +113,7 @@ const Documents = ({navigation, ...props}) => {
 
   const checkNet = async () => {
     const value = await AsyncStorage.getItem('AllFolders');
-    console.log('itemmm', value);
     item = JSON.parse(value);
-
     setParentFolder(item);
   };
 
@@ -262,8 +251,6 @@ const Documents = ({navigation, ...props}) => {
         .catch(err => {
           console.log(err.message, err.code);
         });
-
-      // setFileData(item);
     } else {
       api
         .get(`/folderfiles/${item?.value?.Id}`)
@@ -337,8 +324,6 @@ const Documents = ({navigation, ...props}) => {
         .catch(err => {
           console.log(err.message, err.code);
         });
-
-      // setFileData(item);
     } else {
       api
         .get(`/folderfiles/${item?.value?.Id}`)
@@ -377,7 +362,6 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const Buttons = ({item}) => {
-    console.log('item', item);
     return (
       <View
         key={item?.value?.Id}

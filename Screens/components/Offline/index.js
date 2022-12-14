@@ -62,9 +62,6 @@ const Offline = ({navigation}) => {
       .catch(err => {
         console.log(err.message, err.code);
       });
-
-    // setFileData(item);
-    // }
   }
 
   const handleView = val => {

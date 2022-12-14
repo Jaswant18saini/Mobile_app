@@ -5,13 +5,11 @@ import RNFS from 'react-native-fs';
 
 const PdfThumbnailImage = ({item}) => {
   const [imageUrl, setImageUrl] = useState('');
-  //   console.log('pdfUrl', item?.url, item);
   useEffect(() => {
     PdfThumbnail.generate(
       `file://${RNFS.DocumentDirectoryPath}/${item?.Id}.pdf`,
       0,
     ).then(res => {
-      console.log('PDF URI', res.uri);
       setImageUrl(res.uri);
     });
   }, [item]);

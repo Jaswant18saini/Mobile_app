@@ -20,10 +20,8 @@ const Header = props => {
     }
     return null;
   };
-  console.log('selectedProjectId', selectedProjectId);
   const docsNavigate = () => {
     Linking.openURL(`https://reactnativeelements.com/docs/${props.view}`);
-    console.log('On login click');
   };
 
   const playgroundNavigate = () => {

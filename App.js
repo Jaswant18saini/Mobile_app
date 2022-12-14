@@ -21,7 +21,6 @@ function App() {
 
   useEffect(() => {
     const linkvar = Linking.getInitialURL();
-    console.log('linkvarnaagtibaaaa', linkvar);
   }, []);
 
   const linking = {
@@ -37,7 +36,6 @@ function App() {
     <NavigationContainer
       linking={linking}
       fallback={<ActivityIndicator color="blue" size="large" />}>
-
       <SafeAreaProvider>
         <Tab.Navigator
           screenOptions={({route}) => ({
