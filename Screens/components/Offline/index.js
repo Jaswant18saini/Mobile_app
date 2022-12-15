@@ -5,7 +5,7 @@ import {
   FlatList,
   ScrollView,
   View,
-  RefreshControl,
+  StyleSheet,
   Image,
   NativeModules,
   TouchableOpacity,
@@ -16,7 +16,6 @@ import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityI
 import RNFS from 'react-native-fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {compact} from 'lodash';
-import {styles} from '../Documents';
 import {useNetInfo} from '@react-native-community/netinfo';
 import {useRoute} from '@react-navigation/native';
 import {PdfThumbnailImage} from '../../common/PdfThumbnailImage';
@@ -92,20 +91,45 @@ const Offline = ({navigation}) => {
           }
           onPress={() => handleView(item)}>
           <View style={styles.Boxwrapper}>
-            <TouchableOpacity>
+            <TouchableOpacity style={{flex: 0.3, marginRight: 15}}>
               <PdfThumbnailImage
                 item={item}
                 handleView={() => handleView(item)}
               />
             </TouchableOpacity>
-            <Text style={[styles.textName, {fontWeight: '900', color: '#333'}]}>
-              {item?.Name}
-            </Text>
-            <Text>V1</Text>
-            <Text style={[styles.textName, {fontWeight: '400', color: '#333'}]}>
-              {item?.Name}
-            </Text>
+            <View style={styles.InnerBox}>
+              <Text style={[styles.textName]} numberOfLines={1}>
+                {/* {item?.Name} */}
+                dfgdfffffffffffffffffffffffffffffffffffffffffffffff
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <Text
+                  style={{
+                    paddingVertical: 2,
+                    paddingHorizontal: 3,
+                    backgroundColor: '#ccc',
+                    color: '#fff',
+                    marginRight: 5,
+                  }}>
+                  V1
+                </Text>
+                <Text
+                  style={{fontWeight: '400', color: '#333', textAlign: 'left'}}>
+                  {item?.Name}
+                </Text>
+              </View>
+            </View>
             <AntDesignIcon
+              style={{
+                width: 30,
+                flex: 0.3,
+                alignSelf: 'flex-end',
+                textAlign: 'right',
+                padding: 5,
+              }}
               type="AntDesign"
               name="ellipsis1"
               color="#808080"
@@ -125,7 +149,7 @@ const Offline = ({navigation}) => {
       ) : (
         <FlatList
           data={fileData}
-          numColumns={2}
+          numColumns={1}
           horizontal={false}
           renderItem={FilesView}
           keyExtractor={item => item.Id}
@@ -134,4 +158,34 @@ const Offline = ({navigation}) => {
     </View>
   );
 };
+
+export const styles = StyleSheet.create({
+  InnerBox: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flex: 2,
+    width: 100,
+    textAlign: 'left',
+  },
+  Boxwrapper: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    borderWidth: 1,
+    padding: 10,
+    borderColor: '#f7f7f7',
+    borderStyle: 'solid',
+    flex: 1,
+    justifyContent: 'space-between',
+    width: '100%',
+    marginHorizontal: 5,
+    marginVertical: 5,
+    backgroundColor: '#fff',
+  },
+  textName: {
+    fontWeight: '500',
+    color: '#333',
+    textAlign: 'left',
+  },
+});
 export default Offline;

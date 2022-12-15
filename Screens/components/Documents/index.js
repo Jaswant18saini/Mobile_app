@@ -453,7 +453,6 @@ const Documents = ({navigation, ...props}) => {
               ]}
             />
           </TouchableHighlight>
-
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
             <Ionicons

@@ -4,7 +4,7 @@ import PdfThumbnail from 'react-native-pdf-thumbnail';
 import RNFS from 'react-native-fs';
 import {TouchableHighlight} from 'react-native';
 
-const PdfThumbnailImage = ({item, handleView}) => {
+const PdfThumbnailImage = ({item, handleView, width, height}) => {
   const [imageUrl, setImageUrl] = useState('');
   useEffect(() => {
     PdfThumbnail.generate(
@@ -21,14 +21,16 @@ const PdfThumbnailImage = ({item, handleView}) => {
       <Image
         source={{uri: imageUrl}}
         style={{
-          width: '100%',
-          height: 150,
+          textAlign: 'left',
+          padding: 5,
+          width: 40,
+          height: 40,
           marginLeft: 'auto',
           marginRight: 'auto',
           flexWrap: 'wrap',
           alignItems: 'center',
           flex: 1,
-          justifyContent: 'center',
+          justifyContent: 'flex-start',
         }}
       />
     </TouchableHighlight>
