@@ -409,9 +409,9 @@ const Documents = ({navigation, ...props}) => {
             <TouchableOpacity>
               <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
             </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleFolderClick(item)}>
+            <TouchableWithoutFeedback onPress={() => handleFolderClick(item)}>
               <Text>{item?.value?.Name}</Text>
-            </TouchableOpacity>
+            </TouchableWithoutFeedback>
             <TouchableWithoutFeedback
               onPress={() => {
                 api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
