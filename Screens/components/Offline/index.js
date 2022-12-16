@@ -1,4 +1,7 @@
 import React, {useEffect, useState} from 'react';
+import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
+import Ionicons from 'react-native-vector-icons/Ionicons';
+
 import {
   ActivityIndicator,
   Text,
@@ -22,6 +25,10 @@ import {PdfThumbnailImage} from '../../common/PdfThumbnailImage';
 
 const Offline = ({navigation}) => {
   const [fileData, setFileData] = useState([]);
+  const [folderData, setfolderData] = useState([]);
+  const [isshowingFolder, setIsShowingFolder] = useState(false);
+
+
   const [currentFile, setCurrentFile] = useState([]);
   const [loader, setLoader] = useState(false);
   const netInfo = useNetInfo();
@@ -41,18 +48,20 @@ const Offline = ({navigation}) => {
     RNFS.readDir(RNFS.DocumentDirectoryPath)
       .then(async result => {
         let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
-        let item = [];
+        let folder_names = [];
         try {
-          const value = await AsyncStorage.getItem('FoldersFiles');
-          item = JSON.parse(value);
-          const updatedData = item?.map((val, index) => {
-            const filedata = datafromstorage?.find(data =>
-              data?.name.includes(val?.Id),
-            );
-            if (fileData) val['download'] = true;
-            return filedata ? val : null;
-          });
+          const updatedData = datafromstorage?.map((val, index) => {
+            if (val?.name.includes('_folder_name_')) {
+              let fname = val?.name?.split('_folder_name_');
+              if (folder_names.includes(fname[1])) {
+              } else {
+                folder_names.push(fname[1]);
+              }
+            }
 
+            return val;
+          });
+          setfolderData(folder_names);
           setFileData(compact(updatedData));
         } catch (err) {
           console.log(err);
@@ -67,8 +76,8 @@ const Offline = ({navigation}) => {
     setCurrentFile(val);
     const documentNew =
       Platform.OS === 'ios'
-        ? `${RNFS.DocumentDirectoryPath}/${val?.id}.pdf`
-        : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}_pspdf.pdf`;
+        ? `${RNFS.DocumentDirectoryPath}/${val?.name}`
+        : `file://${RNFS.DocumentDirectoryPath}/${val?.name}`;
     PSPDFKit.present(documentNew, {
       showThumbnailBar: 'scrollable',
       pageTransition: 'scrollContinuous',
@@ -81,6 +90,10 @@ const Offline = ({navigation}) => {
     const data = {
       image: require('../../../assets/thumbnailDemo2.jpg'),
     };
+    if (item?.name?.includes('_folder_name_') && isshowingFolder==false) {
+      return null;
+    }
+
     return (
       <ScrollView>
         <TouchableWithoutFeedback
@@ -99,7 +112,7 @@ const Offline = ({navigation}) => {
             </TouchableOpacity>
             <View style={styles.InnerBox}>
               <Text style={[styles.textName]} numberOfLines={1}>
-                {item?.Name}
+                {item?.name}
               </Text>
               <View
                 style={{
@@ -141,8 +154,52 @@ const Offline = ({navigation}) => {
     );
   };
 
+  const handleFolderClick = name => {
+    console.log('here working', fileData);
+    let datafromstorage = fileData?.filter(val => val.name.includes(name));
+    console.log('here working', datafromstorage);
+    setIsShowingFolder(true)
+    setFileData(compact(datafromstorage));
+  };
+
+  const FolderView = ({item}) => {
+    console.log('item folder', item);
+    return (
+      <ScrollView style={styles.scrollView}>
+        <TouchableWithoutFeedback onPress={() => handleFolderClick(item)}>
+          <View style={styles.buttonDown}>
+            <TouchableOpacity>
+              <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
+            </TouchableOpacity>
+            <Text>{item}</Text>
+            <Ionicons
+              // onPress={() => handleView(item)}
+              style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
+              type="Ionicons"
+              name="checkmark-done"
+              color="#00bfff"
+              size={25}
+            />
+          </View>
+        </TouchableWithoutFeedback>
+      </ScrollView>
+    );
+  };
+
   return (
     <View style={{width: '100%', paddingHorizontal: 10}}>
+      {folderData?.length === 0 ? (
+        <ActivityIndicator />
+      ) : (
+        <FlatList
+          data={folderData}
+          numColumns={1}
+          horizontal={false}
+          renderItem={FolderView}
+          keyExtractor={item => item}
+        />
+      )}
+
       {fileData?.length === 0 ? (
         <ActivityIndicator />
       ) : (

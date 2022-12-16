@@ -215,6 +215,26 @@ const Documents = ({navigation, ...props}) => {
       .catch(err => {});
   };
 
+
+  const handleDownloadFolder = (val,folder_name) => {
+    console.log('val',val)
+    RNFS.downloadFile({
+      fromUrl: val?.url,
+      toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}_folder_name_${folder_name}.pdf`,
+    })
+      .promise.then(r => {
+        const updatedData = fileData?.map((valu, index) => {
+          if (valu?.Id === val.Id) {
+            valu['download'] = true;
+          }
+          return valu;
+        });
+        setFileData(updatedData);
+      })
+      .catch(err => {});
+  };
+
+
   const handleParentFolder = async item => {
     setSelectedFolder(null);
     setFileData([]);
@@ -361,6 +381,8 @@ const Documents = ({navigation, ...props}) => {
     }
   };
 
+
+
   const Buttons = ({item}) => {
     return (
       <View
@@ -386,19 +408,31 @@ const Documents = ({navigation, ...props}) => {
           disabled={
             netInfo.type !== 'unknown' && netInfo.isInternetReachable === false
           }
-          onPress={() => handleFolderClick(item)}>
+          // onPress={() => handleFolderClick(item)}
+          >
           <View style={styles.buttonDown}>
             <TouchableOpacity>
               <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
             </TouchableOpacity>
             <Text>{item?.value?.Name}</Text>
-            <TouchableOpacity onPress={null}>
+            <TouchableWithoutFeedback onPress={()=>{
+              api.get(`/folderfiles/${item?.value?.Id}`)
+        .then(async res => {
+
+          res?.data.tree?.map((val)=>{
+
+            handleDownloadFolder(val,item?.value?.Name)
+
+          })
+
+        })
+            }}>
               <FontAwesomeIcon
                 type="FontAwesone"
                 name="download"
                 color="#000"
               />
-            </TouchableOpacity>
+            </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>

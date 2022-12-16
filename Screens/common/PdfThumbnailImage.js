@@ -8,7 +8,7 @@ const PdfThumbnailImage = ({item, handleView, width, height}) => {
   const [imageUrl, setImageUrl] = useState('');
   useEffect(() => {
     PdfThumbnail.generate(
-      `file://${RNFS.DocumentDirectoryPath}/${item?.Id}_pspdf.pdf`,
+      `file://${RNFS.DocumentDirectoryPath}/${item?.name}`,
       0,
     ).then(res => {
       setImageUrl('');
