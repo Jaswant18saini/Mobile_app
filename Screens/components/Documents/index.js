@@ -184,8 +184,8 @@ const Documents = ({navigation, ...props}) => {
     } else {
       const documentNew =
         Platform.OS === 'ios'
-          ? `${RNFS.DocumentDirectoryPath}/${val?.id}.pdf`
-          : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`;
+          ? `${RNFS.DocumentDirectoryPath}/${val?.Name}.pdf`
+          : `file://${RNFS.DocumentDirectoryPath}/${val?.Name}.pdf`;
       PSPDFKit.present(documentNew, {
         showThumbnailBar: 'scrollable',
         pageTransition: 'scrollContinuous',
@@ -200,7 +200,7 @@ const Documents = ({navigation, ...props}) => {
     setLoaderForDownload(true);
     RNFS.downloadFile({
       fromUrl: val?.url,
-      toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}_pspdf.pdf`,
+      toFile: `${RNFS.DocumentDirectoryPath}/${val.Name}.pdf`,
     })
       .promise.then(r => {
         const updatedData = fileData?.map((valu, index) => {
@@ -215,9 +215,7 @@ const Documents = ({navigation, ...props}) => {
       .catch(err => {});
   };
 
-
-  const handleDownloadFolder = (val,folder_name) => {
-    console.log('val',val)
+  const handleDownloadFolder = (val, folder_name) => {
     RNFS.downloadFile({
       fromUrl: val?.url,
       toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}_folder_name_${folder_name}.pdf`,
@@ -233,7 +231,6 @@ const Documents = ({navigation, ...props}) => {
       })
       .catch(err => {});
   };
-
 
   const handleParentFolder = async item => {
     setSelectedFolder(null);
@@ -381,8 +378,6 @@ const Documents = ({navigation, ...props}) => {
     }
   };
 
-
-
   const Buttons = ({item}) => {
     return (
       <View
@@ -409,24 +404,22 @@ const Documents = ({navigation, ...props}) => {
             netInfo.type !== 'unknown' && netInfo.isInternetReachable === false
           }
           // onPress={() => handleFolderClick(item)}
-          >
+        >
           <View style={styles.buttonDown}>
             <TouchableOpacity>
               <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
             </TouchableOpacity>
-            <Text>{item?.value?.Name}</Text>
-            <TouchableWithoutFeedback onPress={()=>{
-              api.get(`/folderfiles/${item?.value?.Id}`)
-        .then(async res => {
-
-          res?.data.tree?.map((val)=>{
-
-            handleDownloadFolder(val,item?.value?.Name)
-
-          })
-
-        })
-            }}>
+            <TouchableOpacity onPress={() => handleFolderClick(item)}>
+              <Text>{item?.value?.Name}</Text>
+            </TouchableOpacity>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
+                  res?.data.tree?.map(val => {
+                    handleDownloadFolder(val, item?.value?.Name);
+                  });
+                });
+              }}>
               <FontAwesomeIcon
                 type="FontAwesone"
                 name="download"

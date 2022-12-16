@@ -28,7 +28,6 @@ const Offline = ({navigation}) => {
   const [folderData, setfolderData] = useState([]);
   const [isshowingFolder, setIsShowingFolder] = useState(false);
 
-
   const [currentFile, setCurrentFile] = useState([]);
   const [loader, setLoader] = useState(false);
   const netInfo = useNetInfo();
@@ -90,7 +89,7 @@ const Offline = ({navigation}) => {
     const data = {
       image: require('../../../assets/thumbnailDemo2.jpg'),
     };
-    if (item?.name?.includes('_folder_name_') && isshowingFolder==false) {
+    if (item?.name?.includes('_folder_name_') && isshowingFolder == false) {
       return null;
     }
 
@@ -158,12 +157,13 @@ const Offline = ({navigation}) => {
     console.log('here working', fileData);
     let datafromstorage = fileData?.filter(val => val.name.includes(name));
     console.log('here working', datafromstorage);
-    setIsShowingFolder(true)
+    setIsShowingFolder(true);
     setFileData(compact(datafromstorage));
   };
 
   const FolderView = ({item}) => {
-    console.log('item folder', item);
+    let folderName = item.split('.pdf');
+
     return (
       <ScrollView style={styles.scrollView}>
         <TouchableWithoutFeedback onPress={() => handleFolderClick(item)}>
@@ -171,7 +171,7 @@ const Offline = ({navigation}) => {
             <TouchableOpacity>
               <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
             </TouchableOpacity>
-            <Text>{item}</Text>
+            <Text>{folderName[0]}</Text>
             <Ionicons
               // onPress={() => handleView(item)}
               style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
