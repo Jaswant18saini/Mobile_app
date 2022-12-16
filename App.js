@@ -42,9 +42,6 @@ function App() {
             tabBarIcon: ({focused, color, size}) => {
               let iconName;
 
-              // if (route.name === 'Home') {
-              //   iconName = focused ? 'ios-home-sharp' : 'ios-home-sharp';
-              // } else
               if (route.name === 'Documents') {
                 iconName = focused ? 'md-document' : 'md-document';
               } else if (route.name === 'Issue') {
@@ -74,10 +71,10 @@ function App() {
             tabBarInactiveTintColor: 'gray',
           })}>
           {/* <Tab.Screen name="Home" component={Home} /> */}
+          <Tab.Screen name="Login" component={Login} />
           <Tab.Screen name="Documents" component={Documents} />
           <Tab.Screen name="Issue" component={Issues} />
           <Tab.Screen name="Checklists" component={Checklists} />
-          <Tab.Screen name="Login" component={Login} />
           <Tab.Screen name="Sync" component={Sync} />
           <Tab.Screen name="Daily-logs" component={DialyLogs} />
           <Tab.Screen name="More" component={More} />

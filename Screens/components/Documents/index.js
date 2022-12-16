@@ -540,11 +540,15 @@ const Documents = ({navigation, ...props}) => {
                   ) : (
                     <FlatList
                       data={folderData}
-                      numColumns={3}
+                      numColumns={5}
                       horizontal={false}
                       renderItem={({item}) => <FolderView item={item} />}
                       ItemSeparatorComponent={() => (
-                        <View style={{height: 10}} />
+                        <View
+                          style={{
+                            height: 10,
+                          }}
+                        />
                       )}
                       keyExtractor={item => item.value.Id}
                     />
@@ -622,6 +626,7 @@ export const styles = StyleSheet.create({
     flex: 1,
     width: '100%',
     color: '#000',
+    margin: 10,
   },
   Boxwrapper: {
     flexDirection: 'column',
