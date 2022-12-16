@@ -99,8 +99,7 @@ const Offline = ({navigation}) => {
             </TouchableOpacity>
             <View style={styles.InnerBox}>
               <Text style={[styles.textName]} numberOfLines={1}>
-                {/* {item?.Name} */}
-                dfgdfffffffffffffffffffffffffffffffffffffffffffffff
+                {item?.Name}
               </Text>
               <View
                 style={{
