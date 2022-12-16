@@ -1,12 +1,11 @@
 import React from 'react';
-import {Text} from 'react-native';
-import {View} from 'react-native';
+import {Text, View} from 'react-native';
 
-const Issues = () => {
+const Issue = () => {
   return (
     <View>
       <Text>Issues</Text>
     </View>
   );
 };
-export default Issues;
+export default Issue;

@@ -4,20 +4,21 @@ import {
   Text,
   FlatList,
   ScrollView,
-  RefreshControl,
+  View,
+  StyleSheet,
   Image,
   NativeModules,
   TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
-import FontAwesomeIcon from 'react-native-vector-icons/FontAwesome';
-import {View} from 'react-native';
+import AntDesignIcon from 'react-native-vector-icons/AntDesign';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import RNFS from 'react-native-fs';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import {compact} from 'lodash';
-import {styles} from '../Documents';
 import {useNetInfo} from '@react-native-community/netinfo';
 import {useRoute} from '@react-navigation/native';
+import {PdfThumbnailImage} from '../../common/PdfThumbnailImage';
 
 const Offline = ({navigation}) => {
   const [fileData, setFileData] = useState([]);
@@ -26,7 +27,6 @@ const Offline = ({navigation}) => {
   const netInfo = useNetInfo();
   const route = useRoute();
 
-  console.log(route, 'routessssssssssssssssssssssssssssss');
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
       _downloadedFiles();
@@ -34,7 +34,6 @@ const Offline = ({navigation}) => {
     // Return the function to unsubscribe from the event so it gets removed on unmount
     return unsubscribe;
   }, []);
-  console.log('fileData', fileData);
   var PSPDFKit = NativeModules.PSPDFKit;
 
   function _downloadedFiles() {
@@ -46,7 +45,6 @@ const Offline = ({navigation}) => {
         try {
           const value = await AsyncStorage.getItem('FoldersFiles');
           item = JSON.parse(value);
-          // console.log(datafromstorage)
           const updatedData = item?.map((val, index) => {
             const filedata = datafromstorage?.find(data =>
               data?.name.includes(val?.Id),
@@ -63,44 +61,20 @@ const Offline = ({navigation}) => {
       .catch(err => {
         console.log(err.message, err.code);
       });
-
-    // setFileData(item);
-    // }
   }
 
   const handleView = val => {
     setCurrentFile(val);
-    if (!val?.download && netInfo.isInternetReachable === true) {
-      setLoader(true);
-      const result = Math.random().toString(36).substring(2, 7);
-      RNFS.downloadFile({
-        fromUrl: val?.url,
-        toFile: `${RNFS.DocumentDirectoryPath}/${result}.pdf`,
-      }).promise.then(r => {
-        const documentNew =
-          Platform.OS === 'ios'
-            ? `${RNFS.DocumentDirectoryPath}/${result}.pdf`
-            : `file://${RNFS.DocumentDirectoryPath}/${result}.pdf`;
-        setLoader(false);
-        PSPDFKit.present(documentNew, {
-          showThumbnailBar: 'scrollable',
-          pageTransition: 'scrollContinuous',
-          scrollDirection: 'vertical',
-          documentLabelEnabled: true,
-        });
-      });
-    } else {
-      const documentNew =
-        Platform.OS === 'ios'
-          ? `${RNFS.DocumentDirectoryPath}/${val?.id}.pdf`
-          : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`;
-      PSPDFKit.present(documentNew, {
-        showThumbnailBar: 'scrollable',
-        pageTransition: 'scrollContinuous',
-        scrollDirection: 'vertical',
-        documentLabelEnabled: true,
-      });
-    }
+    const documentNew =
+      Platform.OS === 'ios'
+        ? `${RNFS.DocumentDirectoryPath}/${val?.id}.pdf`
+        : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}_pspdf.pdf`;
+    PSPDFKit.present(documentNew, {
+      showThumbnailBar: 'scrollable',
+      pageTransition: 'scrollContinuous',
+      scrollDirection: 'vertical',
+      documentLabelEnabled: true,
+    });
   };
 
   const FilesView = ({item}) => {
@@ -117,12 +91,50 @@ const Offline = ({navigation}) => {
           }
           onPress={() => handleView(item)}>
           <View style={styles.Boxwrapper}>
-            <TouchableOpacity>
-              <FontAwesomeIcon type="FontAwesome" name="file" color="#000" />
+            <TouchableOpacity style={{flex: 0.3, marginRight: 15}}>
+              <PdfThumbnailImage
+                item={item}
+                handleView={() => handleView(item)}
+              />
             </TouchableOpacity>
-            <Text style={[styles.textName, {fontWeight: '900', color: '#333'}]}>
-              {item?.Name}
-            </Text>
+            <View style={styles.InnerBox}>
+              <Text style={[styles.textName]} numberOfLines={1}>
+                {/* {item?.Name} */}
+                dfgdfffffffffffffffffffffffffffffffffffffffffffffff
+              </Text>
+              <View
+                style={{
+                  flexDirection: 'row',
+                }}>
+                <Text
+                  style={{
+                    paddingVertical: 2,
+                    paddingHorizontal: 3,
+                    backgroundColor: '#ccc',
+                    color: '#fff',
+                    marginRight: 5,
+                  }}>
+                  V1
+                </Text>
+                <Text
+                  style={{fontWeight: '400', color: '#333', textAlign: 'left'}}>
+                  {item?.File_Name__c}
+                </Text>
+              </View>
+            </View>
+            <AntDesignIcon
+              style={{
+                width: 30,
+                flex: 0.3,
+                alignSelf: 'flex-end',
+                textAlign: 'right',
+                padding: 5,
+              }}
+              type="AntDesign"
+              name="ellipsis1"
+              color="#808080"
+              size={40}
+            />
           </View>
         </TouchableWithoutFeedback>
         {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
@@ -137,7 +149,7 @@ const Offline = ({navigation}) => {
       ) : (
         <FlatList
           data={fileData}
-          numColumns={4}
+          numColumns={1}
           horizontal={false}
           renderItem={FilesView}
           keyExtractor={item => item.Id}
@@ -146,4 +158,34 @@ const Offline = ({navigation}) => {
     </View>
   );
 };
+
+export const styles = StyleSheet.create({
+  InnerBox: {
+    flexDirection: 'column',
+    justifyContent: 'flex-start',
+    alignItems: 'flex-start',
+    flex: 2,
+    width: 100,
+    textAlign: 'left',
+  },
+  Boxwrapper: {
+    alignItems: 'center',
+    flexDirection: 'row',
+    borderWidth: 1,
+    padding: 10,
+    borderColor: '#f7f7f7',
+    borderStyle: 'solid',
+    flex: 1,
+    justifyContent: 'space-between',
+    width: '100%',
+    marginHorizontal: 5,
+    marginVertical: 5,
+    backgroundColor: '#fff',
+  },
+  textName: {
+    fontWeight: '500',
+    color: '#333',
+    textAlign: 'left',
+  },
+});
 export default Offline;

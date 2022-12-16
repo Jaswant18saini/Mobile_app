@@ -1,12 +1,13 @@
 import React from 'react';
 import {Text} from 'react-native';
-import {View} from 'react-native';
 
-const Checklists = () => {
+const Checklists = props => {
+  console.log('props', props);
+
   return (
-    <View>
-      <Text>Checklists</Text>
-    </View>
+    <>
+      <Text>Raka</Text>
+    </>
   );
 };
 export default Checklists;

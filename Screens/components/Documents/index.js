@@ -22,6 +22,7 @@ import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
 import PSPDFKitView from 'react-native-pspdfkit';
+import { cloneDeep } from 'lodash';
 
 const Documents = ({navigation, ...props}) => {
   const [parentFolder, setParentFolder] = useState();
@@ -33,12 +34,11 @@ const Documents = ({navigation, ...props}) => {
   const [loaderForDownload, setLoaderForDownload] = useState(false);
   const [selectedfolder, setSelectedFolder] = useState(null);
 
+  const [selectedProjectId, setSelectedProjectId] = useState('');
+  //a0f0r000000vIrEAAU
+  const [projectOptions, setProjectOptions] = useState([]);
   const [fileToLoad, setFileToLoad] = useState(null);
   const docViewerRef = React.createRef(null);
-
-  const [selectedProjectId, setSelectedProjectId] =
-    useState('a0f0r000000vIrEAAU');
-  const [projectOptions, setProjectOptions] = useState([]);
 
   const api = create({
     baseURL: 'http://34.231.129.177',
@@ -113,13 +113,21 @@ const Documents = ({navigation, ...props}) => {
     console.log('documents', props);
 
     const unsubscribe = navigation.addListener('focus', () => {
-      Allfolder();
       getLoginInfo().then(res => {
         current_folder_options(res);
+        Allfolder();
       });
     });
     return unsubscribe;
-  }, [props, selectedProjectId]);
+  }, [props]);
+
+  useEffect(() => {
+    Allfolder();
+  }, [selectedProjectId]);
+
+  const handleClosePdf = () => {
+    setFileToLoad(null);
+  };
 
   const checkNet = async () => {
     const value = await AsyncStorage.getItem('AllFolders');
@@ -136,25 +144,6 @@ const Documents = ({navigation, ...props}) => {
       Allfolder();
     }
   }, [netInfo.type, netInfo.isInternetReachable]);
-
-
-  // handle back button
-  useEffect(() => {
-    const backAction = () => {
-      console.log('handle back button');
-      setFileToLoad(null);
-      return true;
-    };
-
-    const backHandler = BackHandler.addEventListener(
-      "hardwareBackPress",
-      backAction
-    );
-
-    return () => backHandler.remove();
-  }, []);
-
-
   var PSPDFKit = NativeModules.PSPDFKit;
 
   const get = async (data = null) => {
@@ -191,31 +180,6 @@ const Documents = ({navigation, ...props}) => {
         console.log(err.message, err.code);
       });
   };
-
-  useEffect(() => {
-    if(fileToLoad) {
-      /*if(docViewerRef?.current) {
-        console.log('doc viewer is available');
-        if (currentFile?.Instant_Json__c) {
-          //console.log("pdfMarkup >>>>>>>>>>>>", pdfopenfiledata.markupJSON);
-          let annotationList = JSON.parse(currentFile.Instant_Json__c).annotations;
-          console.log('checking annotation values::>>', annotationList);
-          const pdfMarkup = {
-            format: 'https://pspdfkit.com/instant-json/v1',
-            annotations: annotationList,
-          };
-    
-          docViewerRef.current.addAnnotations(annotationList).then(function(success) {
-            console.log('success: ' + success);
-            })
-          .catch(function(error) {
-          console.log('There has been a problem with your fetch operation: ' + JSON.stringify(error));
-          });
-          console.log('Anotations added');
-        }
-      }*/
-    } 
-  },[fileToLoad]); 
   const handleView = val => {
     let pdfMarkup;
     if (val?.Instant_Json__c) {
@@ -298,9 +262,10 @@ const Documents = ({navigation, ...props}) => {
       });
     } else {
       console.log('Test');
+      //_pspdf is required in ios
       const documentNew =
         Platform.OS === 'ios'
-          ? `${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`
+          ? `${RNFS.DocumentDirectoryPath}/${val?.Id}}_pspdf.pdf`
           : `file://${RNFS.DocumentDirectoryPath}/${val?.Id}.pdf`;
       PSPDFKit.present(documentNew, {
         showThumbnailBar: 'scrollable',
@@ -514,6 +479,37 @@ const Documents = ({navigation, ...props}) => {
     }
   };
 
+  const handleSaveAnnotations = () => {
+    docViewerRef.current
+      .getAllUnsavedAnnotations()
+      .then(result => {
+        if (result) {
+          // save api call. 
+          console.log('current selected file ', currentFile);
+          console.log(JSON.stringify(result));
+          api.put(`/markup/${currentFile.Id}`, result)
+          .then((success) => {
+            console.log('success add annotations:: ', success);
+            alert('Annotations Saved');
+            const fileData = cloneDeep(currentFile);
+            filedata.Instant_Json__c = JSON.stringify(result);
+            setCurrentFile(fileData);
+          })
+          .catch((error) => {
+            alert('Failed to Save Annotations');
+            console.log('failed add annotations:: ', error);
+          });
+        } else {
+          alert('Failed to Save Annotations');
+          console.log('Failed to export annotations.');
+        }
+      })
+      .catch(error => {
+        alert('Failed to Save Annotations');
+        console.log(JSON.stringify(error));
+      });
+  };
+
   const Buttons = ({item}) => {
     console.log('item', item);
     return (
@@ -582,7 +578,7 @@ const Documents = ({navigation, ...props}) => {
       <ScrollView>
         <View style={styles.Boxwrapper}>
           <Text style={[styles.textName, {fontWeight: '900', color: '#333'}]}>
-            {item?.Name}
+            {item?.File_Name__c}
           </Text>
           <TouchableHighlight
             disabled={
@@ -607,6 +603,7 @@ const Documents = ({navigation, ...props}) => {
               ]}
             />
           </TouchableHighlight>
+
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
             <Ionicons
@@ -736,22 +733,26 @@ const Documents = ({navigation, ...props}) => {
 
           {/* view controlled */}
           {fileToLoad && (
-            <View style={{ flex: 1}} >
-            <PSPDFKitView
-              document={fileToLoad}
-              ref={docViewerRef}
-              fragmentTag="PDF1"
-              style={{flex: 1}}
-            />
-            <View style={ {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 5,
-  } }>
-              <Button
-                onPress={() => {
-                  // Programmatically add an ink annotation.
-                  /* const annotationJSON = {
+            <View style={{flex: 1}}>
+              <PSPDFKitView
+                document={fileToLoad}
+                showNavigationButtonInToolbar={true} // Show the navigation back button on Android.
+                showCloseButton={true}
+                ref={docViewerRef}
+                fragmentTag="PDF1"
+                style={{flex: 1}}
+                onNavigationButtonClicked={handleClosePdf}
+              />
+              <View
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  padding: 5,
+                }}>
+                <Button
+                  onPress={() => {
+                    // Programmatically add an ink annotation.
+                    /* const annotationJSON = {
                     bbox: [
                       89.586334228515625, 98.5791015625, 143.12948608398438,
                       207.1583251953125,
@@ -783,31 +784,34 @@ const Documents = ({navigation, ...props}) => {
                     type: 'pspdfkit/ink',
                     v: 1,
                   }; */
-                  if (currentFile?.Instant_Json__c) {
-                    //console.log("pdfMarkup >>>>>>>>>>>>", pdfopenfiledata.markupJSON);
-                    let annotationList = JSON.parse(currentFile.Instant_Json__c).annotations;
-                    console.log('checking annotation values::>>', annotationList);
-                    const pdfMarkup = {
-                      format: 'https://pspdfkit.com/instant-json/v1',
-                      annotations: annotationList,
-                    };
+                    if (currentFile?.Instant_Json__c) {
+                      //console.log("pdfMarkup >>>>>>>>>>>>", pdfopenfiledata.markupJSON);
+                      let annotationList = JSON.parse(
+                        currentFile.Instant_Json__c,
+                      ).annotations;
+                      console.log(
+                        'checking annotation values::>>',
+                        annotationList,
+                      );
+                      const pdfMarkup = {
+                        format: 'https://pspdfkit.com/instant-json/v1',
+                        annotations: annotationList,
+                      };
 
-                    docViewerRef.current
-                    .addAnnotations(pdfMarkup)
-                    .then(result => {
-                      if (result) {
-                        alert('Annotation was successfully added.');
-                      } else {
-                        alert('Failed to add annotation.');
-                      }
-                    })
-                    .catch(error => {
-                      alert(JSON.stringify(error));
-                    });
-              
-                    
-                  }
-                  /*docViewerRef.current
+                      docViewerRef.current
+                        .addAnnotations(pdfMarkup)
+                        .then(result => {
+                          if (result) {
+                            alert('Annotation was successfully added.');
+                          } else {
+                            alert('Failed to add annotation.');
+                          }
+                        })
+                        .catch(error => {
+                          alert(JSON.stringify(error));
+                        });
+                    }
+                    /*docViewerRef.current
                     .addAnnotation(annotationJSON)
                     .then(result => {
                       if (result) {
@@ -819,12 +823,12 @@ const Documents = ({navigation, ...props}) => {
                     .catch(error => {
                       alert(JSON.stringify(error));
                     });*/
-                }}
-                title="Show Markup"
-                accessibilityLabel="Add Ink Annotation"
-              />
-             
-            </View>
+                  }}
+                  title="Show Markup"
+                  accessibilityLabel="Add Ink Annotation"
+                />
+                <Button onPress={handleSaveAnnotations} title="Save Annotations" />
+              </View>
             </View>
           )}
         </>
@@ -834,9 +838,6 @@ const Documents = ({navigation, ...props}) => {
 };
 
 export const styles = StyleSheet.create({
-
-
-
   container: {
     backgroundColor: '#e7ecf0',
     flex: 1,
