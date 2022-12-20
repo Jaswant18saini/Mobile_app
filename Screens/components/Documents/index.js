@@ -20,6 +20,7 @@ import Header from './Header';
 import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
+import _ from 'lodash';
 
 const Documents = ({navigation, ...props}) => {
   const [parentFolder, setParentFolder] = useState();
@@ -34,6 +35,7 @@ const Documents = ({navigation, ...props}) => {
   const [selectedfolder, setSelectedFolder] = useState(null);
 
   const [selectedProjectId, setSelectedProjectId] = useState('');
+  const [previous, setPrevious] = useState([]);
   //a0f0r000000vIrEAAU
   const [projectOptions, setProjectOptions] = useState([]);
 
@@ -236,6 +238,7 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const handleParentFolder = async item => {
+    console.log('item>>>>>>>>>>>>>', item);
     setSelectedFolder(null);
     setFileData([]);
     setFolderData(item?.children);
@@ -310,6 +313,7 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const handleFolderClick = async item => {
+    console.log('handleFolderClick', item);
     setSelectedFolder(item?.value?.Name);
     setFileData([]);
     setFolderData(item?.children);
@@ -394,27 +398,31 @@ const Documents = ({navigation, ...props}) => {
         }}>
         <Button
           title={item?.value?.Name}
-          onPress={() => handleParentFolder(item)}
+          onPress={() => {
+            handleParentFolder(item);
+            setPrevious([...previous, item]);
+          }}
         />
       </View>
     );
   };
 
   const FolderView = ({item}) => {
-    // console.log('hey', item);
     return (
       <ScrollView style={styles.scrollView}>
         <TouchableWithoutFeedback
           disabled={
             netInfo.type !== 'unknown' && netInfo.isInternetReachable === false
-          }
-          // onPress={() => handleFolderClick(item)}
-        >
+          }>
           <View style={styles.buttonDown}>
             <TouchableOpacity>
               <FontAwesomeIcon type="FontAwesome" name="folder" color="#000" />
             </TouchableOpacity>
-            <TouchableWithoutFeedback onPress={() => handleFolderClick(item)}>
+            <TouchableWithoutFeedback
+              onPress={() => {
+                handleFolderClick(item);
+                setPrevious([...previous, item]);
+              }}>
               <Text>{item?.value?.Name}</Text>
             </TouchableWithoutFeedback>
             {item?.download ? (
@@ -551,6 +559,17 @@ const Documents = ({navigation, ...props}) => {
     );
   };
 
+  const handleBack = () => {
+    const secondLastElement = previous?.slice(-2, -1);
+    const lastElement = previous.slice(-1);
+    const rejected = _.reject(previous, lastElement[0]);
+    console.log('secondLastElement', secondLastElement);
+    console.log('lastElement', lastElement);
+    console.log('rejected', rejected);
+    setPrevious(rejected);
+    handleFolderClick(secondLastElement[0]);
+  };
+
   return (
     <>
       {loading ? (
@@ -563,6 +582,7 @@ const Documents = ({navigation, ...props}) => {
               selectedProjectId={selectedProjectId}
               setSelectedProjectId={setSelectedProjectId}
             />
+
             <View>
               <FlatList
                 style={styles.button}
@@ -581,6 +601,9 @@ const Documents = ({navigation, ...props}) => {
                 <Text style={{textAlign: 'center', marginBottom: 10}}>
                   Folders
                 </Text>
+                {previous?.length > 1 && (
+                  <Button title="back" onPress={handleBack} />
+                )}
                 <View style={styles.mainBx}>
                   {fileData?.length === 0 ? (
                     <ActivityIndicator />
