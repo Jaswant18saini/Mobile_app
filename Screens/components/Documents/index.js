@@ -249,7 +249,7 @@ const Documents = ({navigation, ...props}) => {
 
             const updatedData = item?.map((val, index) => {
               const filedata = datafromstorage?.find(data =>
-                data?.name.includes(val?.Id),
+                data?.name.includes(val?.Name),
               );
 
               if (filedata) {
@@ -276,10 +276,11 @@ const Documents = ({navigation, ...props}) => {
             let datafromstorage = result?.filter(val =>
               val.name.includes('.pdf'),
             );
+            console.log('datafromstorage', datafromstorage);
 
             let updated_data = await res?.data?.tree?.map(async items => {
               const filedatas = datafromstorage?.find(data =>
-                data?.name.includes(items?.Id),
+                data?.name.includes(items?.Name),
               );
 
               if (filedatas) {
@@ -397,6 +398,7 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const FolderView = ({item}) => {
+    // console.log('hey', item);
     return (
       <ScrollView style={styles.scrollView}>
         <TouchableWithoutFeedback
@@ -448,6 +450,7 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const FilesView = ({item}) => {
+    //  console.log('fileItem', item);
     const data = {
       image: require('../../../assets/thumbnailDemo2.jpg'),
     };
