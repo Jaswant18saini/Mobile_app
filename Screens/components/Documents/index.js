@@ -24,6 +24,8 @@ import {ScrollView} from 'react-native';
 const Documents = ({navigation, ...props}) => {
   const [parentFolder, setParentFolder] = useState();
   const [folderData, setFolderData] = useState();
+  const [currentFolderId, setCurrentFolderId] = useState([]);
+  const [folderDownloadLoader, setFolderDownloadLoader] = useState(false);
   const [fileData, setFileData] = useState();
   const [loader, setLoader] = useState(false);
   const [currentFile, setCurrentFile] = useState([]);
@@ -227,6 +229,7 @@ const Documents = ({navigation, ...props}) => {
           }
           return valu;
         });
+        setFolderDownloadLoader(false);
         setFileData(updatedData);
       })
       .catch(err => {});
@@ -414,20 +417,34 @@ const Documents = ({navigation, ...props}) => {
             <TouchableWithoutFeedback onPress={() => handleFolderClick(item)}>
               <Text>{item?.value?.Name}</Text>
             </TouchableWithoutFeedback>
-            <TouchableWithoutFeedback
-              onPress={() => {
-                api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
-                  res?.data.tree?.map(val => {
-                    handleDownloadFolder(val, item?.value?.Name);
-                  });
-                });
-              }}>
-              <FontAwesomeIcon
-                type="FontAwesone"
-                name="download"
-                color="#000"
+            {item?.download ? (
+              <Ionicons
+                style={{textAlign: 'center', marginTop: 15, marginBottom: 10}}
+                type="Ionicons"
+                name="checkmark-done"
+                color="#00bfff"
+                size={25}
               />
-            </TouchableWithoutFeedback>
+            ) : currentFolderId === item?.value?.Id && folderDownloadLoader ? (
+              <ActivityIndicator />
+            ) : (
+              <TouchableWithoutFeedback
+                onPress={() => {
+                  setCurrentFolderId(item?.value?.Id);
+                  setFolderDownloadLoader(true);
+                  api.get(`/folderfiles/${item?.value?.Id}`).then(async res => {
+                    res?.data.tree?.map(val => {
+                      handleDownloadFolder(val, item?.value?.Name);
+                    });
+                  });
+                }}>
+                <FontAwesomeIcon
+                  type="FontAwesone"
+                  name="download"
+                  color="#000"
+                />
+              </TouchableWithoutFeedback>
+            )}
           </View>
         </TouchableWithoutFeedback>
       </ScrollView>
@@ -580,7 +597,7 @@ const Documents = ({navigation, ...props}) => {
                           }}
                         />
                       )}
-                      keyExtractor={item => item.value.Id}
+                      keyExtractor={item => item?.value?.Id}
                     />
                   )}
                 </View>
