@@ -231,17 +231,36 @@ const Documents = ({navigation, ...props}) => {
           }
           return valu;
         });
+
         setFolderDownloadLoader(false);
-        setFileData(updatedData);
       })
       .catch(err => {});
   };
 
   const handleParentFolder = async item => {
-    console.log('item>>>>>>>>>>>>>', item);
     setSelectedFolder(null);
     setFileData([]);
-    setFolderData(item?.children);
+    RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
+      let datafromstorage = result?.filter(val =>
+        val.name.includes('_folder_name_'),
+      );
+
+      const newData = item?.children?.map((dataItem, index) => {
+        let dataStorage = datafromstorage?.filter(val =>
+          val.name.includes(dataItem?.value?.Name),
+        );
+
+        if (dataStorage?.length > 0) {
+          dataItem['download'] = true;
+        } else {
+          dataItem['download'] = false;
+        }
+        return dataItem;
+        // datafromstorage?.map((data, index) => {});
+      });
+      setFolderData(newData);
+    });
+
     if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
       RNFS.readDir(RNFS.DocumentDirectoryPath)
         .then(async result => {
@@ -282,7 +301,6 @@ const Documents = ({navigation, ...props}) => {
             let datafromstorage = result?.filter(val =>
               val.name.includes('.pdf'),
             );
-            console.log('datafromstorage', datafromstorage);
 
             let updated_data = await res?.data?.tree?.map(async items => {
               const filedatas = datafromstorage?.find(data =>
@@ -313,7 +331,6 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const handleFolderClick = async item => {
-    console.log('handleFolderClick', item);
     setSelectedFolder(item?.value?.Name);
     setFileData([]);
     setFolderData(item?.children);
@@ -444,6 +461,13 @@ const Documents = ({navigation, ...props}) => {
                     res?.data.tree?.map(val => {
                       handleDownloadFolder(val, item?.value?.Name);
                     });
+                    const updatedData = folderData?.map((valu, index) => {
+                      if (valu?.value?.Id === item?.value?.Id) {
+                        valu['download'] = true;
+                      }
+                      return valu;
+                    });
+                    setFolderData(updatedData);
                   });
                 }}>
                 <FontAwesomeIcon
@@ -475,7 +499,6 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const FilesView = ({item}) => {
-    //  console.log('fileItem', item);
     const data = {
       image: require('../../../assets/thumbnailDemo2.jpg'),
     };
@@ -563,9 +586,6 @@ const Documents = ({navigation, ...props}) => {
     const secondLastElement = previous?.slice(-2, -1);
     const lastElement = previous.slice(-1);
     const rejected = _.reject(previous, lastElement[0]);
-    console.log('secondLastElement', secondLastElement);
-    console.log('lastElement', lastElement);
-    console.log('rejected', rejected);
     setPrevious(rejected);
     handleFolderClick(secondLastElement[0]);
   };
