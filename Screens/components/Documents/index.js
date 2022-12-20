@@ -229,8 +229,8 @@ const Documents = ({navigation, ...props}) => {
           }
           return valu;
         });
+
         setFolderDownloadLoader(false);
-        setFileData(updatedData);
       })
       .catch(err => {});
   };
@@ -238,7 +238,27 @@ const Documents = ({navigation, ...props}) => {
   const handleParentFolder = async item => {
     setSelectedFolder(null);
     setFileData([]);
-    setFolderData(item?.children);
+    RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
+      let datafromstorage = result?.filter(val =>
+        val.name.includes('_folder_name_'),
+      );
+
+      const newData = item?.children?.map((dataItem, index) => {
+        let dataStorage = datafromstorage?.filter(val =>
+          val.name.includes(dataItem?.value?.Name),
+        );
+        console.log('dataStorage', dataStorage);
+        if (dataStorage?.length > 0) {
+          dataItem['download'] = true;
+        } else {
+          dataItem['download'] = false;
+        }
+        return dataItem;
+        // datafromstorage?.map((data, index) => {});
+      });
+      setFolderData(newData);
+    });
+
     if (netInfo.type !== 'unknown' && netInfo.isInternetReachable === false) {
       RNFS.readDir(RNFS.DocumentDirectoryPath)
         .then(async result => {
@@ -401,7 +421,7 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const FolderView = ({item}) => {
-    // console.log('hey', item);
+    console.log('item', item);
     return (
       <ScrollView style={styles.scrollView}>
         <TouchableWithoutFeedback
@@ -436,6 +456,15 @@ const Documents = ({navigation, ...props}) => {
                     res?.data.tree?.map(val => {
                       handleDownloadFolder(val, item?.value?.Name);
                     });
+                    const updatedData = folderData?.map((valu, index) => {
+                      if (valu?.value?.Id === item?.value?.Id) {
+                        console.log('andr ja rha hai');
+                        valu['download'] = true;
+                      }
+                      return valu;
+                    });
+                    setFolderData(updatedData);
+                    console.log('updatedData', updatedData);
                   });
                 }}>
                 <FontAwesomeIcon
