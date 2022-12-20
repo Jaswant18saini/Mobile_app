@@ -36,3 +36,15 @@ Add platform-tools to Path
 Default Location %LOCALAPPDATA%\Android\Sdk\platform-tools
 
 react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res
+
+
+
+
+Commands for Apk  Testing (run on terminal)
+ 
+-react-native bundle --platform android --dev false --entry-file index.js --bundle-output android/app/src/main/assets/index.android.bundle --assets-dest android/app/src/main/res 
+-cd android
+-./gradlew assembleDebug
+
+Apk path that can be installed over mobile 
+Mobile_app/android/app/build/outputs/apk/debug/app-debug.apk

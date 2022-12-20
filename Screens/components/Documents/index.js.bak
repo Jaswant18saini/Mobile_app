@@ -314,7 +314,7 @@ const Documents = ({navigation, ...props}) => {
     setLoaderForDownload(true);
     RNFS.downloadFile({
       fromUrl: val?.url,
-      toFile: `${RNFS.DocumentDirectoryPath}/${val.Name}_pspdf.pdf`,
+      toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}_pspdf.pdf`,
     })
       .promise.then(r => {
         const updatedData = fileData?.map((valu, index) => {

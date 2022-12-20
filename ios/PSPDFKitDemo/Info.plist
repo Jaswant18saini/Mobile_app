@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<string>com.pspdfkitdemo</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -25,15 +25,15 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIBackgroundModes</key>
-	<array>
-	<string>audio</string>
-	</array>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>Recording sound annotations requires the microphone.</string>
-	<key>NSCameraUsageDescription</key>
-	<string>Pictures captured with the camera can be added to the document as image annotations.</string>
-	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Images from documents and annotations can be saved to the photo library.</string>
+    <array>
+    <string>audio</string>
+    </array>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Recording sound annotations requires the microphone.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Pictures captured with the camera can be added to the document as image annotations.</string>
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>Images from documents and annotations can be saved to the photo library.</string>
 	<key>NSAppTransportSecurity</key>
 	<dict>
 		<key>NSAllowsArbitraryLoads</key>
@@ -51,6 +51,23 @@
 			</dict>
 		</dict>
 	</dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+    		<key>CFBundleTypeRole</key>
+	        <string>None</string>
+	        <key>CFBundleURLName</key>
+	        <string>/oauth</string>
+	        <key>CFBundleURLSchemes</key>
+	        <array>
+	       		<string>com.pspdfkitdemo</string>
+    		</array>
+		</dict>
+	</array>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>com.pspdfkitdemo</string>
+	</array>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string></string>
 	<key>UIAppFonts</key>
