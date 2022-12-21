@@ -21,6 +21,7 @@ import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
 import _ from 'lodash';
+import { ShowThumbnail } from '../../common/ShowThumbnail';
 
 const Documents = ({navigation, ...props}) => {
   const [parentFolder, setParentFolder] = useState();
@@ -515,7 +516,8 @@ const Documents = ({navigation, ...props}) => {
               !item?.download
             }
             onPress={() => handleView(item)}>
-            <Image
+              <ShowThumbnail item={item} />
+            {/* <Image
               source={data?.image}
               style={[
                 {
@@ -529,7 +531,7 @@ const Documents = ({navigation, ...props}) => {
                   justifyContent: 'center',
                 },
               ]}
-            />
+            /> */}
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
