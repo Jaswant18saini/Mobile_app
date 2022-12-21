@@ -5,7 +5,7 @@ import RNFS from 'react-native-fs';
 
 const ShowThumbnail = ({item}) => {
   const [imageUrl, setImageUrl] = useState('');
-  //   console.log('pdfUrl', item?.url, item);
+    console.log('pdfUrl', item?.url, item);
   useEffect(() => {
     const ThumbnailCreate = async () => {
       const localFile = `${RNFS.DocumentDirectoryPath}/${item.File_Name__c}`;
@@ -17,14 +17,20 @@ const ShowThumbnail = ({item}) => {
       // last step it will download open it with fileviewer.
       RNFS.downloadFile(options)
         .promise.then(() => {
-          PdfThumbnail.generate(
-            `file://${RNFS.DocumentDirectoryPath}/${item?.File_Name__c}`,
-            // 'file://' + RNFS.DocumentDirectoryPath + item?.File_Name__c,
-            0,
-          ).then(res => {
-            console.log('PDF URI', res.uri);
-            setImageUrl(res.uri);
-          });
+            setTimeout(()=>{
+                PdfThumbnail.generate(
+                    `file://${RNFS.DocumentDirectoryPath}/${item?.File_Name__c}`,
+                    // 'file://' + RNFS.DocumentDirectoryPath + item?.File_Name__c,
+                    0,
+                  ).then(res => {
+                    console.log('PDF URI', res.uri);
+                    setImageUrl(res.uri);
+                  });
+
+            }, 2000); 
+
+
+          
         })
 
         .catch(error => {
@@ -32,7 +38,12 @@ const ShowThumbnail = ({item}) => {
         });
     };
     if (item?.File_Type__c === 'pdf') {
-      ThumbnailCreate();
+        try{
+            ThumbnailCreate();
+
+        }catch(err){
+            console.log('error',error)
+        }
     }
   }, [item]);
 
