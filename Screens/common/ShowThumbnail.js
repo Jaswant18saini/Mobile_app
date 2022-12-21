@@ -18,7 +18,8 @@ const ShowThumbnail = ({item}) => {
       RNFS.downloadFile(options)
         .promise.then(() => {
           PdfThumbnail.generate(
-            'file://' + RNFS.DocumentDirectoryPath + item?.File_Name__c,
+            `file://${RNFS.DocumentDirectoryPath}/${item?.File_Name__c}`,
+            // 'file://' + RNFS.DocumentDirectoryPath + item?.File_Name__c,
             0,
           ).then(res => {
             console.log('PDF URI', res.uri);
