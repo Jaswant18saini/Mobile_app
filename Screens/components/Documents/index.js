@@ -16,12 +16,15 @@ import {
 } from 'react-native';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {create} from 'apisauce';
+
 import Header from './Header';
 import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
 import _ from 'lodash';
-import { ShowThumbnail } from '../../common/ShowThumbnail';
+import {horizontalScale, moderateScale, verticalScale} from '../../Metrics';
+import DeviceInfo from 'react-native-device-info';
+import {ShowThumbnail} from '../../common/ShowThumbnail';
 
 const Documents = ({navigation, ...props}) => {
   const [parentFolder, setParentFolder] = useState();
@@ -39,6 +42,10 @@ const Documents = ({navigation, ...props}) => {
   const [previous, setPrevious] = useState([]);
   //a0f0r000000vIrEAAU
   const [projectOptions, setProjectOptions] = useState([]);
+  console.log('horizontalScale', horizontalScale(70));
+
+  const isTablet = DeviceInfo.isTablet();
+  console.log(isTablet);
 
   const api = create({
     baseURL: 'http://34.231.129.177',
@@ -516,7 +523,7 @@ const Documents = ({navigation, ...props}) => {
               !item?.download
             }
             onPress={() => handleView(item)}>
-              <ShowThumbnail item={item} />
+            <ShowThumbnail item={item} />
             {/* <Image
               source={data?.image}
               style={[
@@ -623,6 +630,24 @@ const Documents = ({navigation, ...props}) => {
                 <Text style={{textAlign: 'center', marginBottom: 10}}>
                   Folders
                 </Text>
+                {/* <Button
+                  onPress={async () => {
+                    var items = ['searchButtonItem', 'readerViewButtonItem'];
+
+                    if (Platform.OS == 'ios') {
+                      // Update the right bar buttons for iOS.
+                      await this.refs.pdfView.setRightBarButtonItems(
+                        items,
+                        'document',
+                        false,
+                      );
+                    } else if (Platform.OS == 'android') {
+                      // Update the toolbar menu items for Android.
+                      await this.refs.pdfView.setToolbarMenuItems(items);
+                    }
+                  }}
+                  title="Update the right bar button items"
+                /> */}
                 {previous?.length > 1 && (
                   <Button title="back" onPress={handleBack} />
                 )}
@@ -632,7 +657,7 @@ const Documents = ({navigation, ...props}) => {
                   ) : (
                     <FlatList
                       data={folderData}
-                      numColumns={5}
+                      numColumns={isTablet ? 5 : 2}
                       horizontal={false}
                       renderItem={({item}) => <FolderView item={item} />}
                       ItemSeparatorComponent={() => (
