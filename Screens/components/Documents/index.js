@@ -52,8 +52,9 @@ const Documents = ({navigation, ...props}) => {
   const [showAnnotations, setShowAnnotations] = useState(false);
   const [markupAccess, setMarkupAccess] = useState(false);
   const docViewerRef = React.createRef(null);
-  
-  console.log('horizontalScale', horizontalScale(70));
+
+  console.log('horizontalScale', currentFile?.id);
+  console.log('folderData', fileData);
 
   const isTablet = DeviceInfo.isTablet();
   console.log(isTablet);
@@ -78,7 +79,7 @@ const Documents = ({navigation, ...props}) => {
 
   async function current_folder_options(loginInfo) {
     const LoginInfo = JSON.parse(loginInfo);
-   // const LoginInfo1 = JSON.parse(userId);
+    // const LoginInfo1 = JSON.parse(userId);
     console.log('LoginInfo>llllllllllllllllllllll', LoginInfo);
     await api
       .get(
@@ -99,14 +100,14 @@ const Documents = ({navigation, ...props}) => {
           });
           setProjectOptions(ProjectOptions);
           api
-                    .get(
-                      `/get_current_user2?token=${LoginInfo.access_token}&instanceUrl=${LoginInfo.instance_url}`,
-                    )
-                    .then(res => {
-                      setUserName(res?.data?.username);
-                      setUserId1(res?.data?.userId);
-                        console.log('pageCount::>', pageCount);
-          });
+            .get(
+              `/get_current_user2?token=${LoginInfo.access_token}&instanceUrl=${LoginInfo.instance_url}`,
+            )
+            .then(res => {
+              setUserName(res?.data?.username);
+              setUserId1(res?.data?.userId);
+              console.log('pageCount::>', pageCount);
+            });
         }
       })
       .catch(err => {
@@ -157,7 +158,7 @@ const Documents = ({navigation, ...props}) => {
 
   const handleClosePdf = () => {
     setShowAnnotations(false);
-    setMarkupAccess(false)
+    setMarkupAccess(false);
     setFileToLoad(null);
   };
 
@@ -250,26 +251,27 @@ const Documents = ({navigation, ...props}) => {
         Platform.OS === 'ios'
           ? `${RNFS.DocumentDirectoryPath}/${val?.File_Name__c}.pdf`
           : `file://${RNFS.DocumentDirectoryPath}/${val?.File_Name__c}.pdf`;
-      PSPDFKit.present(documentNew, {
-        showThumbnailBar: 'scrollable',
-        pageTransition: 'scrollContinuous',
-        scrollDirection: 'vertical',
-        documentLabelEnabled: true,
-      })
-        .then(success => {
-          if (success) {
-            console.log('sucees annotiation');
-            // And finally, present the newly processed document with embedded annotations.
-            PSPDFKit.addAnnotations(pdfMarkup);
-          } else {
-            // alert('Failed to embed annotations.');
-            console.log('Failed to embed annotations.');
-          }
-        })
-        .catch(error => {
-          // alert(JSON.stringify(error));
-          console.log('Failed to embed annotations.', error);
-        });
+      setFileToLoad(documentNew);
+      // PSPDFKit.present(documentNew, {
+      //   showThumbnailBar: 'scrollable',
+      //   pageTransition: 'scrollContinuous',
+      //   scrollDirection: 'vertical',
+      //   documentLabelEnabled: true,
+      // })
+      //   .then(success => {
+      //     if (success) {
+      //       console.log('sucees annotiation');
+      //       // And finally, present the newly processed document with embedded annotations.
+      //       PSPDFKit.addAnnotations(pdfMarkup);
+      //     } else {
+      //       // alert('Failed to embed annotations.');
+      //       console.log('Failed to embed annotations.');
+      //     }
+      //   })
+      //   .catch(error => {
+      //     // alert(JSON.stringify(error));
+      //     console.log('Failed to embed annotations.', error);
+      //   });
       /*PSPDFKit.addAnnotations(pdfMarkup).then(success => {
             if (success) {
               console.log("sucees annotiation");
@@ -533,94 +535,90 @@ const Documents = ({navigation, ...props}) => {
     }
   };
 
-
   const handlePublic = () => {
-    if(markupAccess) {
-      setPublicPrivate("private")
-      setMarkupAccess(false)
-      return("private")
-    }else{
-    setMarkupAccess(true)
-    setPublicPrivate("public")
-    return("public")
+    if (markupAccess) {
+      setPublicPrivate('private');
+      setMarkupAccess(false);
+      return 'private';
+    } else {
+      setMarkupAccess(true);
+      setPublicPrivate('public');
+      return 'public';
     }
   };
 
   const handleSaveAnnotations = () => {
     for (let p = 0; p < pageCount; p++) {
-            docViewerRef.current
-              .getAllUnsavedAnnotations()
-              .then(result => {
-                if (result) {
-                  console.log('data json for markup', JSON.stringify(result));
-                  
-                    for (let e = 0; e < result.annotations.length; e++) {
-                      if( result.annotations[e].customData == undefined) {
-                      let customData = {
-                        userId: userId1,
-                        userFullName: userName,
-                        source: 'save_annotation',
-                        access: publicPrivate,
-                      };
-                      console.log("customData ::", customData);
-                      result.annotations[e]['customData'] = customData;
-                      //const resultData = result.get().set("customData", customData)
-                      console.log('Size  :: ' + result.annotations.length);
-                      console.log('json for markup', JSON.stringify(result));
-                    }
-                  }
-                  if (netInfo.isInternetReachable) {
-                    
-                    // save api call.
-                    //  console.log('current selected file ', currentFile);
-                    // console.log("json for markup",JSON.stringify(result));
-                   
-                    api
-                      .put(`/markup/${currentFile.Id}`, result)
-                      .then(success => {
-                        console.log('success add annotations:: ', success);
-                        alert('Annotations Saved');
-                        const fileDataTmp = cloneDeep(currentFile);
-                        if (fileDataTmp?.Instant_Json__c) {
-                          const annotationsObj = JSON.parse(
-                            fileDataTmp.Instant_Json__c,
-                          );
-                          if (annotationsObj.annotations) {
-                            annotationsObj.annotations = [
-                              ...annotationsObj.annotations,
-                              ...result.annotations,
-                            ];
-                          } else {
-                            annotationsObj.annotations = result.annotations;
-                          }
-                          fileDataTmp.Instant_Json__c =
-                            JSON.stringify(annotationsObj);
-                          setCurrentFile(fileDataTmp);
-                        } else {
-                          fileDataTmp.Instant_Json__c = JSON.stringify(result);
-                          setCurrentFile(fileDataTmp);
-                        }
-                      })
-                      .catch(error => {
-                        alert('Failed to Save Annotations');
-                        console.log('failed add annotations:: ', error);
-                      }); 
-                  } else {
-                    // save offline
-                    handleSaveOfflineAnnotations(currentFile.Id, result);
-                  }
-                } else {
-                  alert('Failed to Save Annotations');
-                  console.log('Failed to export annotations.');
-                }
-              })
-              .catch(error => {
-                alert('Failed to Save Annotations');
-                console.log(JSON.stringify(error));
-              });
-          
+      docViewerRef.current
+        .getAllUnsavedAnnotations()
+        .then(result => {
+          if (result) {
+            console.log('data json for markup', JSON.stringify(result));
+
+            for (let e = 0; e < result.annotations.length; e++) {
+              if (result.annotations[e].customData == undefined) {
+                let customData = {
+                  userId: userId1,
+                  userFullName: userName,
+                  source: 'save_annotation',
+                  access: publicPrivate,
+                };
+                console.log('customData ::', customData);
+                result.annotations[e]['customData'] = customData;
+                //const resultData = result.get().set("customData", customData)
+                console.log('Size  :: ' + result.annotations.length);
+                console.log('json for markup', JSON.stringify(result));
+              }
             }
-   
+            if (netInfo.isInternetReachable) {
+              // save api call.
+              //  console.log('current selected file ', currentFile);
+              // console.log("json for markup",JSON.stringify(result));
+
+              api
+                .put(`/markup/${currentFile.Id}`, result)
+                .then(success => {
+                  console.log('success add annotations:: ', success);
+                  alert('Annotations Saved');
+                  const fileDataTmp = cloneDeep(currentFile);
+                  if (fileDataTmp?.Instant_Json__c) {
+                    const annotationsObj = JSON.parse(
+                      fileDataTmp.Instant_Json__c,
+                    );
+                    if (annotationsObj.annotations) {
+                      annotationsObj.annotations = [
+                        ...annotationsObj.annotations,
+                        ...result.annotations,
+                      ];
+                    } else {
+                      annotationsObj.annotations = result.annotations;
+                    }
+                    fileDataTmp.Instant_Json__c =
+                      JSON.stringify(annotationsObj);
+                    setCurrentFile(fileDataTmp);
+                  } else {
+                    fileDataTmp.Instant_Json__c = JSON.stringify(result);
+                    setCurrentFile(fileDataTmp);
+                  }
+                })
+                .catch(error => {
+                  alert('Failed to Save Annotations');
+                  console.log('failed add annotations:: ', error);
+                });
+            } else {
+              // save offline
+              handleSaveOfflineAnnotations(currentFile.Id, result);
+            }
+          } else {
+            alert('Failed to Save Annotations');
+            console.log('Failed to export annotations.');
+          }
+        })
+        .catch(error => {
+          alert('Failed to Save Annotations');
+          console.log(JSON.stringify(error));
+        });
+    }
   };
 
   const _showAnnotations = (dataObj, cb = () => {}) => {
@@ -636,8 +634,8 @@ const Documents = ({navigation, ...props}) => {
 
   const handleShowHideAnnotations = () => {
     if (showAnnotations) {
-      const annotations =   docViewerRef.current.getAllUnsavedAnnotations();
-      console.log("hideMarkupannotation",JSON.stringify(annotations));
+      const annotations = docViewerRef.current.getAllUnsavedAnnotations();
+      console.log('hideMarkupannotation', JSON.stringify(annotations));
     } else {
       // show annotations
       if (currentFile?.Instant_Json__c) {
@@ -776,8 +774,8 @@ const Documents = ({navigation, ...props}) => {
               !item?.download
             }
             onPress={() => handleView(item)}>
-            <ShowThumbnail item={item} />
-            {/* <Image
+            {/* <ShowThumbnail item={item} /> */}
+            <Image
               source={data?.image}
               style={[
                 {
@@ -791,7 +789,7 @@ const Documents = ({navigation, ...props}) => {
                   justifyContent: 'center',
                 },
               ]}
-            /> */}
+            />
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
@@ -850,6 +848,26 @@ const Documents = ({navigation, ...props}) => {
     const rejected = _.reject(previous, lastElement[0]);
     setPrevious(rejected);
     handleFolderClick(secondLastElement[0]);
+  };
+
+  const handleBackPdf = () => {
+    let index = fileData?.findIndex(x => x.Id == currentFile?.Id);
+
+    if (index !== -1) {
+      let pdfFOrward = fileData[index - 1];
+      console.log('pdfFOrward', pdfFOrward);
+      handleView(pdfFOrward);
+    }
+  };
+
+  const handleFrontPdf = () => {
+    let index = fileData?.findIndex(x => x.Id == currentFile?.Id);
+
+    if (index !== -1) {
+      let pdfFOrward = fileData[index + 1];
+      console.log('pdfFOrward', pdfFOrward);
+      handleView(pdfFOrward);
+    }
   };
 
   return (
@@ -939,6 +957,8 @@ const Documents = ({navigation, ...props}) => {
           {/* view controlled */}
           {fileToLoad && (
             <View style={{flex: 1}}>
+              <Button onPress={() => handleBackPdf()} title="Back " />
+              <Button onPress={() => handleFrontPdf()} title="front " />
               <PSPDFKitView
                 document={fileToLoad}
                 showNavigationButtonInToolbar={true} // Show the navigation back button on Android.
@@ -948,8 +968,8 @@ const Documents = ({navigation, ...props}) => {
                 style={{flex: 1}}
                 onNavigationButtonClicked={handleClosePdf}
                 onStateChanged={event => {
-                  console.log(' count is ' + event.pageCount);
-                  pageCount = event.pageCount;
+                  console.log(' count is ' + event?.pageCount);
+                  let pageCount = event?.pageCount;
                 }}
               />
               <View
@@ -967,7 +987,7 @@ const Documents = ({navigation, ...props}) => {
                   onPress={handleSaveAnnotations}
                   title="Save Annotations"
                 />
-                 <Button
+                <Button
                   onPress={handlePublic}
                   title={markupAccess ? 'public' : 'private'}
                 />
