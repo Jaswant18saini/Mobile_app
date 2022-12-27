@@ -21,7 +21,6 @@ function App() {
   const [isLogin, setIsLogin] = useState(false);
 
   const getLoginInfo = async () => {
-    console.log('loginInfo', loginInfo);
     const loginInfo = await AsyncStorage.getItem('loginInfo');
     return loginInfo;
   };

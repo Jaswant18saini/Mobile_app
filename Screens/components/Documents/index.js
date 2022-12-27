@@ -51,6 +51,7 @@ const Documents = ({navigation, ...props}) => {
   const [fileToLoad, setFileToLoad] = useState(null);
   const [showAnnotations, setShowAnnotations] = useState(false);
   const [markupAccess, setMarkupAccess] = useState(false);
+
   const docViewerRef = React.createRef(null);
 
   console.log('horizontalScale', currentFile?.id);
@@ -214,7 +215,6 @@ const Documents = ({navigation, ...props}) => {
   const handleView = val => {
     let pdfMarkup;
     if (val?.Instant_Json__c) {
-      //console.log("pdfMarkup >>>>>>>>>>>>", pdfopenfiledata.markupJSON);
       let annotationList = JSON.parse(val.Instant_Json__c).annotations;
       console.log('checking annotation values::>>', annotationList);
       pdfMarkup = {
@@ -223,8 +223,7 @@ const Documents = ({navigation, ...props}) => {
       };
     }
     setCurrentFile(val);
-    //console.log("mark values::>>",val);
-    // console.log("checking values of files::>>", annotationList);
+
     if (!val?.download && netInfo.isInternetReachable === true) {
       setLoader(true);
       const result = Math.random().toString(36).substring(2, 7);
@@ -772,8 +771,8 @@ const Documents = ({navigation, ...props}) => {
               !item?.download
             }
             onPress={() => handleView(item)}>
-            <ShowThumbnail item={item} />
-            {/* <Image
+            {/* <ShowThumbnail item={item} /> */}
+            <Image
               source={data?.image}
               style={[
                 {
@@ -787,7 +786,7 @@ const Documents = ({navigation, ...props}) => {
                   justifyContent: 'center',
                 },
               ]}
-            /> */}
+            />
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
@@ -850,7 +849,6 @@ const Documents = ({navigation, ...props}) => {
 
   const handleBackPdf = () => {
     let index = fileData?.findIndex(x => x.Id == currentFile?.Id);
-
     if (index !== -1) {
       let extension = '';
       let i = index;
@@ -861,7 +859,7 @@ const Documents = ({navigation, ...props}) => {
         extension = pdfFOrward?.File_Type__c;
         i--;
       }
-      //  handleView(pdfFOrward);
+      handleView(pdfFOrward);
     }
   };
 
@@ -873,7 +871,7 @@ const Documents = ({navigation, ...props}) => {
       let i = index;
       let pdfFOrward = {};
       while (extension !== 'pdf') {
-        console.log('front', i);
+        console.log('front>>>>>>>>>', i);
         pdfFOrward = fileData[i];
         extension = pdfFOrward?.File_Type__c;
         i++;
@@ -969,8 +967,25 @@ const Documents = ({navigation, ...props}) => {
           {/* view controlled */}
           {fileToLoad && (
             <View style={{flex: 1}}>
-              <Button onPress={() => handleBackPdf()} title="Back " />
-              <Button onPress={() => handleFrontPdf()} title="front " />
+              {loader ? (
+                <ActivityIndicator size="large" />
+              ) : (
+                <View>
+                  <Ionicons
+                    name="arrow-back-circle"
+                    type="Ionicons"
+                    onPress={() => handleBackPdf()}
+                    size={50}
+                  />
+                  <Ionicons
+                    name="arrow-forward-circle"
+                    type="Ionicons"
+                    onPress={() => handleFrontPdf()}
+                    size={50}
+                  />
+                </View>
+              )}
+
               <PSPDFKitView
                 document={fileToLoad}
                 showNavigationButtonInToolbar={true} // Show the navigation back button on Android.
