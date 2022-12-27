@@ -772,8 +772,8 @@ const Documents = ({navigation, ...props}) => {
               !item?.download
             }
             onPress={() => handleView(item)}>
-            {/* <ShowThumbnail item={item} /> */}
-            <Image
+            <ShowThumbnail item={item} />
+            {/* <Image
               source={data?.image}
               style={[
                 {
@@ -787,7 +787,7 @@ const Documents = ({navigation, ...props}) => {
                   justifyContent: 'center',
                 },
               ]}
-            />
+            /> */}
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (

@@ -5,7 +5,7 @@ import * as querystring from 'query-string';
 import {useNavigation} from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const Login = () => {
+const Login = ({setIsLogin}) => {
   const [token, setToken] = useState(null);
 
   const navigation = useNavigation();
@@ -14,6 +14,7 @@ const Login = () => {
     if (event.url.includes('http://localhost:3002')) {
       const loginInfo = querystring.parse(event.url.split('#')[1]);
       if (loginInfo?.access_token) {
+        setIsLogin(true);
         setToken(loginInfo?.access_token);
         AsyncStorage.setItem('loginInfo', JSON.stringify(loginInfo));
         navigation.navigate('Documents');
