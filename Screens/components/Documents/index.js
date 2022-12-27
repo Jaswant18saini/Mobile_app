@@ -89,9 +89,7 @@ const Documents = ({navigation, ...props}) => {
         console.log('ccccc', res);
         if (res?.status === 200) {
           let ProjectOptions = [];
-          console.log(
-            'ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt',
-          );
+
           res?.data?.records?.map(val => {
             ProjectOptions.push({
               value: val?.Id,
@@ -854,18 +852,32 @@ const Documents = ({navigation, ...props}) => {
     let index = fileData?.findIndex(x => x.Id == currentFile?.Id);
 
     if (index !== -1) {
-      let pdfFOrward = fileData[index - 1];
-      console.log('pdfFOrward', pdfFOrward);
-      handleView(pdfFOrward);
+      let extension = '';
+      let i = index;
+      let pdfFOrward = {};
+      while (extension !== 'pdf') {
+        console.log('yyyyy', i);
+        pdfFOrward = fileData[i];
+        extension = pdfFOrward?.File_Type__c;
+        i--;
+      }
+      //  handleView(pdfFOrward);
     }
   };
 
   const handleFrontPdf = () => {
     let index = fileData?.findIndex(x => x.Id == currentFile?.Id);
-
+    console.log('index', index);
     if (index !== -1) {
-      let pdfFOrward = fileData[index + 1];
-      console.log('pdfFOrward', pdfFOrward);
+      let extension = '';
+      let i = index;
+      let pdfFOrward = {};
+      while (extension !== 'pdf') {
+        console.log('front', i);
+        pdfFOrward = fileData[i];
+        extension = pdfFOrward?.File_Type__c;
+        i++;
+      }
       handleView(pdfFOrward);
     }
   };
