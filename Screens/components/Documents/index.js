@@ -21,7 +21,7 @@ import Header from './Header';
 import {useNetInfo} from '@react-native-community/netinfo';
 import RNFS from 'react-native-fs';
 import {ScrollView} from 'react-native';
-import _ from 'lodash';
+import _, {wrap} from 'lodash';
 import PSPDFKitView from 'react-native-pspdfkit';
 import {cloneDeep} from 'lodash';
 import {horizontalScale, moderateScale, verticalScale} from '../../Metrics';
@@ -914,7 +914,9 @@ const Documents = ({navigation, ...props}) => {
                       Folders
                     </Text>
                     {previous?.length > 1 && (
-                      <Button title="back" onPress={handleBack} />
+                      <Text onPress={handleBack} style={styles.link}>
+                        back
+                      </Text>
                     )}
                     <View style={styles.mainBx}>
                       {fileData?.length === 0 ? (
@@ -1032,7 +1034,6 @@ export const styles = StyleSheet.create({
     backgroundColor: '#e7ecf0',
     flex: 1,
   },
-
   tinyLogo: {
     width: 50,
     height: 50,
@@ -1053,23 +1054,27 @@ export const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   mainBx: {
-    alignItems: 'center',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    flexWrap: 'wrap',
+    alignItems: 'flex-start',
     backgroundColor: '#e7ecf0',
+    flexDirection: 'row',
+    padding: 15,
+    flexWrap: 'wrap',
+    textAlign: 'left',
   },
+  scrollView: {},
   buttonDown: {
     backgroundColor: 'white',
     padding: 15,
-    flexBasis: 50,
     flexDirection: 'row',
     justifyContent: 'space-between',
+    width: 165,
     flex: 1,
-    width: '100%',
+    alignSelf: 'flex-start',
     color: '#000',
     margin: 5,
+    marginVertical: 10,
   },
+
   Boxwrapper: {
     flexDirection: 'column',
     borderWidth: 1,
@@ -1086,6 +1091,15 @@ export const styles = StyleSheet.create({
   },
   textName: {
     textAlign: 'center',
+  },
+  link: {
+    color: '#1e9bee',
+    fontWeight: '800',
+    marginBottom: 15,
+    maxWidth: 100,
+    marginLeft: 'auto',
+    marginRight: 'auto',
+    fontSize: 20,
   },
 });
 export default Documents;
