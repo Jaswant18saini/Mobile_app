@@ -29,6 +29,7 @@ import DeviceInfo from 'react-native-device-info';
 import {ShowThumbnail} from '../../common/ShowThumbnail';
 
 const Documents = ({navigation, ...props}) => {
+  const [breadCrumList, setBreadCrumList] = useState([]);
   const [parentFolder, setParentFolder] = useState();
   const [folderData, setFolderData] = useState();
   const [currentFolderId, setCurrentFolderId] = useState([]);
@@ -330,6 +331,17 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const handleParentFolder = async item => {
+    let filteredData = breadCrumList?.filter(val => val.Id == item?.value?.Id);
+    if (filteredData?.length == 0) {
+      let breadCrumData = {
+        id: item?.value?.Id,
+        name: item?.value?.Name,
+      };
+      let oldBreadcrumData = breadCrumList;
+      oldBreadcrumData.push(breadCrumData);
+      setBreadCrumList(oldBreadcrumData);
+    }
+
     setSelectedFolder(null);
     setFileData([]);
     RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
@@ -422,7 +434,21 @@ const Documents = ({navigation, ...props}) => {
     }
   };
 
-  const handleFolderClick = async item => {
+  const handleFolderClick = async (item, section = '') => {
+    if (section == '') {
+      let filteredData = breadCrumList?.filter(
+        val => val.Id == item?.value?.Id,
+      );
+      if (filteredData?.length == 0) {
+        let breadCrumData = {
+          id: item?.value?.Id,
+          name: item?.value?.Name,
+        };
+        let oldBreadcrumData = breadCrumList;
+        oldBreadcrumData.push(breadCrumData);
+        setBreadCrumList(oldBreadcrumData);
+      }
+    }
     setSelectedFolder(item?.value?.Name);
     setFileData([]);
     setFolderData(item?.children);
@@ -693,7 +719,7 @@ const Documents = ({navigation, ...props}) => {
             </TouchableOpacity>
             <TouchableWithoutFeedback
               onPress={() => {
-                handleFolderClick(item);
+                handleFolderClick(item, '');
                 setPrevious([...previous, item]);
               }}>
               <Text>{item?.value?.Name}</Text>
@@ -771,8 +797,8 @@ const Documents = ({navigation, ...props}) => {
               !item?.download
             }
             onPress={() => handleView(item)}>
-            {/* <ShowThumbnail item={item} /> */}
-            <Image
+            <ShowThumbnail item={item} />
+            {/* <Image
               source={data?.image}
               style={[
                 {
@@ -786,7 +812,7 @@ const Documents = ({navigation, ...props}) => {
                   justifyContent: 'center',
                 },
               ]}
-            />
+            /> */}
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
@@ -840,11 +866,15 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const handleBack = () => {
+    let oldValue = breadCrumList.filter(function (member, index) {
+      return index !== breadCrumList.length - 1;
+    });
+    setBreadCrumList(oldValue);
     const secondLastElement = previous?.slice(-2, -1);
     const lastElement = previous.slice(-1);
     const rejected = _.reject(previous, lastElement[0]);
     setPrevious(rejected);
-    handleFolderClick(secondLastElement[0]);
+    handleFolderClick(secondLastElement[0], 'handleBack');
   };
 
   const handleBackPdf = () => {
@@ -894,7 +924,7 @@ const Documents = ({navigation, ...props}) => {
                   selectedProjectId={selectedProjectId}
                   setSelectedProjectId={setSelectedProjectId}
                 />
-
+                <Text>{breadCrumList?.map(val => val.name + '>')}</Text>
                 <View>
                   <FlatList
                     style={styles.button}
