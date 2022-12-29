@@ -337,7 +337,7 @@ const Documents = ({navigation, ...props}) => {
         id: item?.value?.Id,
         name: item?.value?.Name,
       };
-      let oldBreadcrumData = breadCrumList;
+      let oldBreadcrumData = [];
       oldBreadcrumData.push(breadCrumData);
       setBreadCrumList(oldBreadcrumData);
     }
@@ -876,36 +876,45 @@ const Documents = ({navigation, ...props}) => {
     setPrevious(rejected);
     handleFolderClick(secondLastElement[0], 'handleBack');
   };
+  console.log('currentFile>>>>>>>>', currentFile);
 
   const handleBackPdf = () => {
     let index = fileData?.findIndex(x => x.Id == currentFile?.Id);
-    if (index !== -1) {
+    console.log('indexBack', index);
+    if (index !== -1 && index > 0) {
       let extension = '';
       let i = index;
-      let pdfFOrward = {};
+      let pdfFOrward;
       while (extension !== 'pdf') {
-        console.log('yyyyy', i);
         pdfFOrward = fileData[i];
+
         extension = pdfFOrward?.File_Type__c;
         i--;
       }
+      setCurrentFile();
+      console.log('pdfFOrwardBack', pdfFOrward);
+      setCurrentFile(pdfFOrward);
       handleView(pdfFOrward);
     }
   };
 
   const handleFrontPdf = () => {
     let index = fileData?.findIndex(x => x.Id == currentFile?.Id);
-    console.log('index', index);
-    if (index !== -1) {
+    console.log('indexFront', index);
+
+    if (index !== -1 && fileData?.length > index + 1) {
       let extension = '';
       let i = index;
-      let pdfFOrward = {};
+      let pdfFOrward;
       while (extension !== 'pdf') {
-        console.log('front>>>>>>>>>', i);
+        console.log('i>>>>>>>>>>', i);
         pdfFOrward = fileData[i];
         extension = pdfFOrward?.File_Type__c;
         i++;
       }
+      setCurrentFile();
+      console.log('pdfFOrwardFront', pdfFOrward);
+      setCurrentFile(pdfFOrward);
       handleView(pdfFOrward);
     }
   };
@@ -924,7 +933,14 @@ const Documents = ({navigation, ...props}) => {
                   selectedProjectId={selectedProjectId}
                   setSelectedProjectId={setSelectedProjectId}
                 />
-                <Text>{breadCrumList?.map(val => val.name + '>')}</Text>
+
+                <Text style={styles.breadcrumb}>
+                  {breadCrumList?.map((val, index) => {
+                    return `${val?.name} ${
+                      breadCrumList?.length <= index + 1 ? '' : '>'
+                    }`;
+                  })}
+                </Text>
                 <View>
                   <FlatList
                     style={styles.button}
@@ -999,43 +1015,50 @@ const Documents = ({navigation, ...props}) => {
           {/* view controlled */}
           {fileToLoad && (
             <View style={{flex: 1}}>
+              <View style={styles.pdfbutton}>
+                <Ionicons
+                  style={styles.iconbtn}
+                  name="arrow-back-circle"
+                  type="Ionicons"
+                  onPress={() => handleBackPdf()}
+                  size={50}
+                />
+                <Ionicons
+                  style={styles.iconbtn}
+                  name="arrow-forward-circle"
+                  type="Ionicons"
+                  onPress={() => handleFrontPdf()}
+                  size={50}
+                />
+              </View>
+
               {loader ? (
-                <ActivityIndicator size="large" />
-              ) : (
-                <View>
-                  <Ionicons
-                    name="arrow-back-circle"
-                    type="Ionicons"
-                    onPress={() => handleBackPdf()}
-                    size={50}
-                  />
-                  <Ionicons
-                    name="arrow-forward-circle"
-                    type="Ionicons"
-                    onPress={() => handleFrontPdf()}
-                    size={50}
-                  />
+                <View style={styles.activity}>
+                  <ActivityIndicator size="large" />
                 </View>
+              ) : (
+                <PSPDFKitView
+                  document={fileToLoad}
+                  showNavigationButtonInToolbar={true} // Show the navigation back button on Android.
+                  showCloseButton={true}
+                  ref={docViewerRef}
+                  fragmentTag="PDF1"
+                  style={{flex: 1, height: 100}}
+                  onNavigationButtonClicked={handleClosePdf}
+                  onStateChanged={event => {
+                    console.log(' count is ' + event?.pageCount);
+                    let pageCount = event?.pageCount;
+                  }}
+                />
               )}
 
-              <PSPDFKitView
-                document={fileToLoad}
-                showNavigationButtonInToolbar={true} // Show the navigation back button on Android.
-                showCloseButton={true}
-                ref={docViewerRef}
-                fragmentTag="PDF1"
-                style={{flex: 1}}
-                onNavigationButtonClicked={handleClosePdf}
-                onStateChanged={event => {
-                  console.log(' count is ' + event?.pageCount);
-                  let pageCount = event?.pageCount;
-                }}
-              />
               <View
                 style={{
                   flexDirection: 'row',
                   alignItems: 'center',
                   padding: 5,
+                  justifyContent: 'center',
+                  gap: 20,
                 }}>
                 <Button
                   onPress={handleShowHideAnnotations}
@@ -1043,6 +1066,7 @@ const Documents = ({navigation, ...props}) => {
                   accessibilityLabel="Add Ink Annotation"
                 />
                 <Button
+                  style={{margin: 10}}
                   onPress={handleSaveAnnotations}
                   title="Save Annotations"
                 />
@@ -1130,6 +1154,21 @@ export const styles = StyleSheet.create({
     marginLeft: 'auto',
     marginRight: 'auto',
     fontSize: 20,
+  },
+  breadcrumb: {
+    fontSize: 20,
+    color: '#1e9bee',
+  },
+  pdfbutton: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+  },
+  activity: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: '88%',
   },
 });
 export default Documents;
