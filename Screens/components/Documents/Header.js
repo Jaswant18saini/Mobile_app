@@ -1,10 +1,8 @@
 import React, {useState} from 'react';
 import {StyleSheet, View, Text, Linking} from 'react-native';
-import {Header as HeaderRNE, HeaderProps, Icon} from '@rneui/themed';
-import {create} from 'apisauce';
+import {Header as HeaderRNE, Icon} from '@rneui/themed';
 import {TouchableOpacity} from 'react-native-gesture-handler';
 import {Dropdown} from 'react-native-element-dropdown';
-import AntDesign from 'react-native-vector-icons/AntDesign';
 
 const Header = props => {
   const [isFocus, setIsFocus] = useState(false);
