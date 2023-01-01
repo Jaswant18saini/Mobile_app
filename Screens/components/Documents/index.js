@@ -53,11 +53,7 @@ const Documents = ({navigation, ...props}) => {
   const [markupAccess, setMarkupAccess] = useState(false);
 
   const docViewerRef = React.createRef(null);
-
   const isTablet = DeviceInfo.isTablet();
-
-  console.log('breadCrumList', breadCrumList);
-
   const api = create({
     baseURL: 'http://34.231.129.177',
     headers: {Accept: 'application/json'},
@@ -324,8 +320,8 @@ const Documents = ({navigation, ...props}) => {
     let filteredData = breadCrumList?.filter(val => val.Id == item?.value?.Id);
     if (filteredData?.length == 0) {
       let breadCrumData = {
-        id: item?.value?.Id,
-        name: item?.value?.Name,
+        Id: item?.value?.Id,
+        Name: item?.value?.Name,
       };
       let oldBreadcrumData = [];
       oldBreadcrumData.push(breadCrumData);
@@ -431,8 +427,8 @@ const Documents = ({navigation, ...props}) => {
       );
       if (filteredData?.length == 0) {
         let breadCrumData = {
-          id: item?.value?.Id,
-          name: item?.value?.Name,
+          Id: item?.value?.Id,
+          Name: item?.value?.Name,
         };
         let oldBreadcrumData = breadCrumList;
         oldBreadcrumData.push(breadCrumData);
@@ -770,8 +766,8 @@ const Documents = ({navigation, ...props}) => {
               !item?.download
             }
             onPress={() => handleView(item)}>
-            {/* <ShowThumbnail item={item} /> */}
-            <Image
+            <ShowThumbnail item={item} />
+            {/* <Image
               source={data?.image}
               style={[
                 {
@@ -785,7 +781,7 @@ const Documents = ({navigation, ...props}) => {
                   justifyContent: 'center',
                 },
               ]}
-            />
+            /> */}
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
@@ -864,7 +860,6 @@ const Documents = ({navigation, ...props}) => {
         i--;
       }
       setCurrentFile();
-
       setCurrentFile(pdfFOrward);
       handleView(pdfFOrward);
     }
@@ -883,18 +878,17 @@ const Documents = ({navigation, ...props}) => {
         i++;
       }
       setCurrentFile();
-
       setCurrentFile(pdfFOrward);
       handleView(pdfFOrward);
     }
   };
 
   const handleBreadCrumb = id => {
-    let item = breadCrumList?.filter(val => val?.Id == id);
+    let item = previous?.filter(val => val?.value?.Id == id);
     let index = breadCrumList?.findIndex(x => x.Id == id);
     let data = breadCrumList?.slice(0, index + 1);
     setBreadCrumList(data);
-    handleFolderClick(item, 'handleBreadCrumb');
+    handleFolderClick(item[0], 'handleBreadCrumb');
   };
 
   return (
@@ -915,10 +909,10 @@ const Documents = ({navigation, ...props}) => {
                 {breadCrumList?.map((val, index) => {
                   return (
                     <Text
-                      onPress={handleBreadCrumb(val?.Id)}
+                      onPress={() => handleBreadCrumb(val?.Id)}
                       style={styles.breadcrumb}>
-                      `${val?.name} $
-                      {breadCrumList?.length <= index + 1 ? '' : '>'}`;{' '}
+                      {val?.Name}
+                      {breadCrumList?.length <= index + 1 ? '' : '>'}
                     </Text>
                   );
                 })}
