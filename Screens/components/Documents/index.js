@@ -905,23 +905,23 @@ const Documents = ({navigation, ...props}) => {
                   selectedProjectId={selectedProjectId}
                   setSelectedProjectId={setSelectedProjectId}
                 />
-
-                {breadCrumList?.map((val, index) => {
-                  return (
-                    <Text
-                      onPress={() => handleBreadCrumb(val?.Id)}
-                      style={styles.breadcrumb}>
-                      {val?.Name}
-                      {breadCrumList?.length <= index + 1 ? '' : '>'}
-                    </Text>
-                  );
-                })}
-
+                <View style={styles.breadcrumbParent}>
+                  {breadCrumList?.map((val, index) => {
+                    return (
+                      <Text
+                        onPress={() => handleBreadCrumb(val?.Id)}
+                        style={styles.breadcrumb}>
+                        {val?.Name}
+                        {breadCrumList?.length <= index + 1 ? '' : ' > '}
+                      </Text>
+                    );
+                  })}
+                </View>
                 <View>
                   <FlatList
                     style={styles.button}
                     data={parentFolder}
-                    renderItem={Buttons}
+                    renderItem={breadCrumList?.length < 2 && Buttons}
                     numColumns={2}
                     horizontal={false}
                     keyExtractor={item => item.value.Id}
@@ -935,11 +935,11 @@ const Documents = ({navigation, ...props}) => {
                     <Text style={{textAlign: 'center', marginBottom: 10}}>
                       Folders
                     </Text>
-                    {previous?.length > 1 && (
+                    {/* {previous?.length > 1 && (
                       <Text onPress={handleBack} style={styles.link}>
                         back
                       </Text>
-                    )}
+                    )} */}
                     <View style={styles.mainBx}>
                       {fileData?.length === 0 ? (
                         <ActivityIndicator />
@@ -1131,8 +1131,11 @@ export const styles = StyleSheet.create({
     fontSize: 20,
   },
   breadcrumb: {
-    fontSize: 20,
+    fontSize: 14,
     color: '#1e9bee',
+  },
+  breadcrumbParent: {
+    flexDirection: 'row',
   },
   pdfbutton: {
     flexDirection: 'row',
