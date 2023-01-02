@@ -51,6 +51,7 @@ const Documents = ({navigation, ...props}) => {
   const [fileToLoad, setFileToLoad] = useState(null);
   const [showAnnotations, setShowAnnotations] = useState(false);
   const [markupAccess, setMarkupAccess] = useState(false);
+  const [currentParentFolder, setCurrentParentFolder] = useState();
 
   const docViewerRef = React.createRef(null);
   const isTablet = DeviceInfo.isTablet();
@@ -58,6 +59,12 @@ const Documents = ({navigation, ...props}) => {
     baseURL: 'http://34.231.129.177',
     headers: {Accept: 'application/json'},
   });
+
+  useEffect(() => {
+    if (currentParentFolder) {
+      handleParentFolder(currentParentFolder);
+    }
+  }, [currentParentFolder]);
 
   const GetToken = async () => {
     return await api
@@ -120,6 +127,7 @@ const Documents = ({navigation, ...props}) => {
           JSON.stringify(res?.data?.tree?.children),
         );
       })
+
       .catch(err => {
         setLoading(false);
       });
@@ -667,6 +675,7 @@ const Documents = ({navigation, ...props}) => {
         <Button
           title={item?.value?.Name}
           onPress={() => {
+            setCurrentParentFolder(item);
             handleParentFolder(item);
             setPrevious([...previous, item]);
           }}
