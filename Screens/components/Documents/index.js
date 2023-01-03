@@ -120,6 +120,7 @@ const Documents = ({navigation, ...props}) => {
     api
       .get(`/folder?projectId=${selectedProjectId}`)
       .then(async res => {
+        console.log('Hello', res);
         setLoading(false);
         setParentFolder(res?.data?.tree?.children);
         await AsyncStorage.setItem(
