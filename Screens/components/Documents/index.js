@@ -61,10 +61,14 @@ const Documents = ({navigation, ...props}) => {
   });
 
   useEffect(() => {
-    if (currentParentFolder) {
-      handleParentFolder(currentParentFolder);
+    console.log('upar');
+    if (breadCrumList?.length > 0) {
+      console.log('hererer', parentFolder);
+      handleParentFolder(
+        breadCrumList[0]?.Name == 'Plan' ? parentFolder[0] : parentFolder[1],
+      );
     }
-  }, [currentParentFolder]);
+  }, [parentFolder]);
 
   const GetToken = async () => {
     return await api
@@ -326,6 +330,7 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const handleParentFolder = async item => {
+    console.log('iddddddddd', item);
     let filteredData = breadCrumList?.filter(val => val.Id == item?.value?.Id);
     if (filteredData?.length == 0) {
       let breadCrumData = {
@@ -776,8 +781,8 @@ const Documents = ({navigation, ...props}) => {
               !item?.download
             }
             onPress={() => handleView(item)}>
-            <ShowThumbnail item={item} />
-            {/* <Image
+            {/* <ShowThumbnail item={item} /> */}
+            <Image
               source={data?.image}
               style={[
                 {
@@ -791,7 +796,7 @@ const Documents = ({navigation, ...props}) => {
                   justifyContent: 'center',
                 },
               ]}
-            /> */}
+            />
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && <ActivityIndicator />}
           {item?.download ? (
