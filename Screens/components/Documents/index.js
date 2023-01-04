@@ -53,8 +53,10 @@ const Documents = ({navigation, ...props}) => {
   const [fileToLoad, setFileToLoad] = useState(null);
   const [showAnnotations, setShowAnnotations] = useState(false);
   const [markupAccess, setMarkupAccess] = useState(false);
-  const docViewerRef = React.createRef(null);
+  const [annotations, setAnnotations] = useState({});
+  const [currentParentFolder, setCurrentParentFolder] = useState();
 
+  const docViewerRef = React.createRef(null);
   var pageCount = 0;
  // console.log('horizontalScale', currentFile?.id);
 //  console.log('folderData', fileData);
@@ -66,7 +68,15 @@ const Documents = ({navigation, ...props}) => {
     baseURL: 'http://34.231.129.177',
     headers: {Accept: 'application/json'},
   });
+  
  // console.log('projectOptions', projectOptions);
+ 
+  useEffect(() => {
+    if (currentParentFolder) {
+      handleParentFolder(currentParentFolder);
+    }
+  }, [currentParentFolder]);
+
   const GetToken = async () => {
     return await api
       .get('/get_accesss_token')
@@ -79,7 +89,7 @@ const Documents = ({navigation, ...props}) => {
         console.log(err);
       });
   };
-
+  
   async function current_folder_options(loginInfo) {
     const LoginInfo = JSON.parse(loginInfo);
     // const LoginInfo1 = JSON.parse(userId);
@@ -109,7 +119,7 @@ const Documents = ({navigation, ...props}) => {
             .then(res => {
               setUserName(res?.data?.username);
               setUserId1(res?.data?.userId);
-              //console.log('pageCount::>', pageCount);
+              console.log('pageCount::>', pageCount);
             });
         }
       })
@@ -119,6 +129,51 @@ const Documents = ({navigation, ...props}) => {
   }
 
   const netInfo = useNetInfo();
+
+  const handleDataSyncStorage = async (docId, index) => {
+    const savedData = await AsyncStorage.getItem('OfflineAnnotations');
+    if (savedData) {
+      const savedDataJson = JSON.parse(savedData);
+      if (savedDataJson[docId].length > 0) {
+        delete savedDataJson[docId];
+      } else {
+        delete savedDataJson[docId];
+      }
+      try {
+        await AsyncStorage.removeItem(
+          'OfflineAnnotations',
+          JSON.stringify(savedDataJson[docId]),
+        );
+      //  setAnnotations(savedDataJson);
+      } catch (error) {
+        console.log('Offline sync Save annotations error: ', error);
+      }
+    }
+  };
+
+   const handleSyncAnnotations = () => {
+    console.log("sync using");
+    if (netInfo.isInternetReachable) {
+      alert('synciing annotations');
+      const offlineData = cloneDeep(annotations);
+      Object.keys(offlineData).forEach(k => {
+        offlineData[k].forEach((a, index) => {
+          const successSynced = [];
+          const jsonObj = JSON.parse(a);
+          api
+            .put(`/markup/${k}`, jsonObj)
+            .then(success => {
+              handleDataSyncStorage(k, index);
+            })
+            .catch(error => {
+              console.log('error sync annotations ', error);
+            });
+        });
+      });
+    } else {
+     // alert('no data connection');
+    }
+  };
 
   function Allfolder() {
   //  console.log('newwwwwwwwww', selectedProjectId);
@@ -161,10 +216,25 @@ const Documents = ({navigation, ...props}) => {
     Allfolder();
   }, [selectedProjectId]);
 
+  
+    
+    const getOfflineAnnotations = async () => {
+      const savedData = await AsyncStorage.getItem('OfflineAnnotations');
+      console.log('saved offline annotations :: ', savedData);
+      setAnnotations(JSON.parse(savedData));
+      
+    };
+    
+ 
+
   const handleClosePdf = () => {
     setShowAnnotations(false);
     setMarkupAccess(false);
     setFileToLoad(null);
+   /* getOfflineAnnotations();
+    if(annotations){
+      handleSyncAnnotations();
+    }*/
   };
 
   const checkNet = async () => {
@@ -180,6 +250,10 @@ const Documents = ({navigation, ...props}) => {
       checkNet();
     } else {
       Allfolder();
+   /*   getOfflineAnnotations();
+      if(annotations){
+        handleSyncAnnotations();
+      }*/
     }
   }, [netInfo.type, netInfo.isInternetReachable]);
   var PSPDFKit = NativeModules.PSPDFKit;
@@ -250,6 +324,12 @@ const Documents = ({navigation, ...props}) => {
         }
       }
     }}, 1000);
+    setTimeout(() => {
+    getOfflineAnnotations();
+    if(annotations ){
+      handleSyncAnnotations();
+    }
+  }, 1000)
   },[fileToLoad]);
 
   const handleView = val => {
@@ -379,7 +459,10 @@ const Documents = ({navigation, ...props}) => {
       oldBreadcrumData.push(breadCrumData);
       setBreadCrumList(oldBreadcrumData);
     }
-
+    getOfflineAnnotations();
+    if(annotations != null){
+      handleSyncAnnotations();
+    }
     setSelectedFolder(null);
     setFileData([]);
     RNFS.readDir(RNFS.DocumentDirectoryPath).then(async result => {
@@ -463,7 +546,7 @@ const Documents = ({navigation, ...props}) => {
               setFileData(results);
             });
           });
-
+          
           await AsyncStorage.setItem(
             'FoldersFiles',
             JSON.stringify(res?.data?.tree),
@@ -880,6 +963,7 @@ const Documents = ({navigation, ...props}) => {
         <Button
           title={item?.value?.Name}
           onPress={() => {
+            setCurrentParentFolder(item);
             handleParentFolder(item);
             setPrevious([...previous, item]);
           }}
@@ -1133,23 +1217,23 @@ const Documents = ({navigation, ...props}) => {
                   selectedProjectId={selectedProjectId}
                   setSelectedProjectId={setSelectedProjectId}
                 />
-
-                {breadCrumList?.map((val, index) => {
-                  return (
-                    <Text
-                      onPress={() => handleBreadCrumb(val?.Id)}
-                      style={styles.breadcrumb}>
-                      {val?.Name}
-                      {breadCrumList?.length <= index + 1 ? '' : '>'}
-                    </Text>
-                  );
-                })}
-
+                <View style={styles.breadcrumbParent}>
+                  {breadCrumList?.map((val, index) => {
+                    return (
+                      <Text
+                        onPress={() => handleBreadCrumb(val?.Id)}
+                        style={styles.breadcrumb}>
+                        {val?.Name}
+                        {breadCrumList?.length <= index + 1 ? '' : ' > '}
+                      </Text>
+                    );
+                  })}
+                </View>
                 <View>
                   <FlatList
                     style={styles.button}
                     data={parentFolder}
-                    renderItem={Buttons}
+                    renderItem={breadCrumList?.length < 2 && Buttons}
                     numColumns={2}
                     horizontal={false}
                     keyExtractor={item => item.value.Id}
@@ -1163,11 +1247,11 @@ const Documents = ({navigation, ...props}) => {
                     <Text style={{textAlign: 'center', marginBottom: 10}}>
                       Folders
                     </Text>
-                    {previous?.length > 1 && (
+                    {/* {previous?.length > 1 && (
                       <Text onPress={handleBack} style={styles.link}>
                         back
                       </Text>
-                    )}
+                    )} */}
                     <View style={styles.mainBx}>
                       {fileData?.length < 0 ? (
                         <ActivityIndicator />
@@ -1362,8 +1446,11 @@ export const styles = StyleSheet.create({
     fontSize: 20,
   },
   breadcrumb: {
-    fontSize: 20,
+    fontSize: 14,
     color: '#1e9bee',
+  },
+  breadcrumbParent: {
+    flexDirection: 'row',
   },
   pdfbutton: {
     flexDirection: 'row',
