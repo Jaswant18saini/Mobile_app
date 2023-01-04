@@ -77,6 +77,12 @@ const Documents = ({navigation, ...props}) => {
     }
   }, [currentParentFolder]);
 
+  useEffect(() => {
+    if (currentParentFolder) {
+      handleParentFolder(currentParentFolder);
+    }
+  }, [currentParentFolder]);
+
   const GetToken = async () => {
     return await api
       .get('/get_accesss_token')
@@ -181,6 +187,7 @@ const Documents = ({navigation, ...props}) => {
     api
       .get(`/folder?projectId=${selectedProjectId}`)
       .then(async res => {
+        console.log('Hello', res);
         setLoading(false);
         setParentFolder(res?.data?.tree?.children);
         setFolderData(null);
@@ -190,6 +197,7 @@ const Documents = ({navigation, ...props}) => {
           JSON.stringify(res?.data?.tree?.children),
         );
       })
+
       .catch(err => {
         setLoading(false);
       });
