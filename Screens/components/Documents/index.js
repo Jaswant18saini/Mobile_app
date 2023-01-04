@@ -58,29 +58,15 @@ const Documents = ({navigation, ...props}) => {
 
   const docViewerRef = React.createRef(null);
   var pageCount = 0;
-  // console.log('horizontalScale', currentFile?.id);
-  //  console.log('folderData', fileData);
 
   const isTablet = DeviceInfo.isTablet();
-  console.log(isTablet);
-
   const api = create({
     baseURL: 'http://34.231.129.177',
     headers: {Accept: 'application/json'},
   });
 
-  // console.log('projectOptions', projectOptions);
-
   useEffect(() => {
-    if (currentParentFolder) {
-      handleParentFolder(currentParentFolder);
-    }
-  }, [currentParentFolder]);
-
-  useEffect(() => {
-    console.log('upar');
     if (breadCrumList?.length > 0) {
-      console.log('hererer', parentFolder);
       handleParentFolder(
         breadCrumList[0]?.Name == 'Plan' ? parentFolder[0] : parentFolder[1],
       );
@@ -102,19 +88,13 @@ const Documents = ({navigation, ...props}) => {
 
   async function current_folder_options(loginInfo) {
     const LoginInfo = JSON.parse(loginInfo);
-    // const LoginInfo1 = JSON.parse(userId);
-    // console.log('LoginInfo>llllllllllllllllllllll', LoginInfo);
     await api
       .get(
         `/get_all_project?token=${LoginInfo.access_token}&instanceUrl=${LoginInfo.instance_url}`,
       )
       .then(res => {
-        //  console.log('ccccc', res);
         if (res?.status === 200) {
           let ProjectOptions = [];
-          //  console.log(
-          //   'ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt',
-          //  );
           res?.data?.records?.map(val => {
             ProjectOptions.push({
               value: val?.Id,
@@ -129,7 +109,6 @@ const Documents = ({navigation, ...props}) => {
             .then(res => {
               setUserName(res?.data?.username);
               setUserId1(res?.data?.userId);
-              console.log('pageCount::>', pageCount);
             });
         }
       })
@@ -162,7 +141,6 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const handleSyncAnnotations = () => {
-    console.log('sync using');
     if (netInfo.isInternetReachable) {
       alert('synciing annotations');
       const offlineData = cloneDeep(annotations);
@@ -186,12 +164,10 @@ const Documents = ({navigation, ...props}) => {
   };
 
   function Allfolder() {
-    //  console.log('newwwwwwwwww', selectedProjectId);
     setLoading(true);
     api
       .get(`/folder?projectId=${selectedProjectId}`)
       .then(async res => {
-        console.log('Hello', res);
         setLoading(false);
         setParentFolder(res?.data?.tree?.children);
         setFolderData(null);
@@ -207,13 +183,10 @@ const Documents = ({navigation, ...props}) => {
       });
   }
   const getLoginInfo = async () => {
-    //  console.log('loginInfo', loginInfo);
     const loginInfo = await AsyncStorage.getItem('loginInfo');
     return loginInfo;
   };
   useEffect(() => {
-    //  console.log('documents', props);
-
     const unsubscribe = navigation.addListener('focus', () => {
       getLoginInfo().then(res => {
         setUserId(res);
@@ -246,7 +219,6 @@ const Documents = ({navigation, ...props}) => {
 
   const checkNet = async () => {
     const value = await AsyncStorage.getItem('AllFolders');
-    // console.log('itemmm', value);
     item = JSON.parse(value);
 
     setParentFolder(item);
@@ -349,14 +321,7 @@ const Documents = ({navigation, ...props}) => {
 
   const handleView = val => {
     console.log('instant json1111::', val.Instant_Json__c);
-
-    //console.log("pdfMarkup >>>>>>>>>>>>", pdfopenfiledata.markupJSON);
-
-    //  console.log('checking annotation values::>>444', annotationList);
-
     setCurrentFile(val);
-    //console.log("mark values::>>",val);
-    // console.log("checking values of files::>>", annotationList);
     if (!val?.download && netInfo.isInternetReachable === true) {
       console.log('instant json1111::', val.Instant_Json__c);
       setLoader(true);
@@ -391,21 +356,17 @@ const Documents = ({navigation, ...props}) => {
       // })
       //   .then(success => {
       //     if (success) {
-      //       console.log('sucees annotiation');
       //       // And finally, present the newly processed document with embedded annotations.
       //       PSPDFKit.addAnnotations(pdfMarkup);
       //     } else {
       //       // alert('Failed to embed annotations.');
-      //       console.log('Failed to embed annotations.');
       //     }
       //   })
       //   .catch(error => {
       //     // alert(JSON.stringify(error));
-      //     console.log('Failed to embed annotations.', error);
       //   });
       /*PSPDFKit.addAnnotations(pdfMarkup).then(success => {
             if (success) {
-              console.log("sucees annotiation");
               // And finally, present the newly processed document with embedded annotations.
               PSPDFKit.present(documentNew, {
                 showThumbnailBar: 'scrollable',
@@ -464,7 +425,6 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const handleParentFolder = async item => {
-    console.log('iddddddddd', item);
     let filteredData = breadCrumList?.filter(val => val.Id == item?.value?.Id);
     if (filteredData?.length == 0) {
       let breadCrumData = {
@@ -587,8 +547,7 @@ const Documents = ({navigation, ...props}) => {
         setBreadCrumList(oldBreadcrumData);
       }
     }
-    console.log('folder path', item?.children),
-      setSelectedFolder(item?.value?.Name);
+    setSelectedFolder(item?.value?.Name);
     setFileData([]);
     setFolderData(item?.children);
 
@@ -680,7 +639,7 @@ const Documents = ({navigation, ...props}) => {
           JSON.stringify(savedDataJson),
         );
       } catch (error) {
-        //    console.log('Offline Save annotations error: ', error);
+        console.log('Offline Save annotations error: ', error);
       }
     } else {
       try {
@@ -732,14 +691,9 @@ const Documents = ({navigation, ...props}) => {
                   source: 'save_annotation',
                   access: publicPrivate,
                 };
-                //  console.log('save result2', JSON.stringify(storeMarkup));
-                // old json
-
-                //  console.log("customData ::", customData);
                 result.annotations[e]['customData'] = customData;
                 //  result.annotations['annotations'] = annotationList;
                 //const resultData = result.get().set("customData", customData)
-                // console.log('Size  :: ' + result.annotations.length);
 
                 //  result.annotations = storeMarkup.annotations
                 console.log('save result3', JSON.stringify(result));
@@ -760,16 +714,12 @@ const Documents = ({navigation, ...props}) => {
 
             //  let annotationList = JSON.parse(currentFile.Instant_Json__c).annotations;
             // result['annotations'] = annotationList;
-            // console.log('save result3', JSON.stringify(result));
             if (netInfo.isInternetReachable) {
               // save api call.
-              //  console.log('current selected file ', currentFile);
-              // console.log("json for markup",JSON.stringify(result));
 
               api
                 .put(`/markup/${currentFile.Id}`, result)
                 .then(success => {
-                  // console.log('success add annotations:: ', success);
                   alert('Annotations Saved');
                   const fileDataTmp = cloneDeep(currentFile);
                   if (fileDataTmp?.Instant_Json__c) {
@@ -842,9 +792,6 @@ const Documents = ({navigation, ...props}) => {
         });
 
       //const annts =  docViewerRef.current.getAnnotations(0, "pspdfkit/ink");
-      //      console.log(' all annotations ' + JSON.stringify(annts));
-
-      //   console.log("hideMarkupannotation",JSON.stringify(annotations));
       var newNum = 'noView';
       var newVal = false;
       var oldNum = 'noPrint';
@@ -857,7 +804,6 @@ const Documents = ({navigation, ...props}) => {
           result.annotations[e]['opacity'] = 1;
           console.log('resut ::', result);
           //   const deepClone = JSON.parse(JSON.stringify(result.annotations[e]));
-          //  console.log('remove ann is ' + JSON.stringify(deepClone));
           docViewerRef.current
             .removeAnnotation(result.annotations[e])
             .then(result => {
@@ -908,9 +854,6 @@ const Documents = ({navigation, ...props}) => {
         });
 
       //const annts =  docViewerRef.current.getAnnotations(0, "pspdfkit/ink");
-      //      console.log(' all annotations ' + JSON.stringify(annts));
-
-      //   console.log("hideMarkupannotation",JSON.stringify(annotations));
       var newNum = 'noView';
       var newVal = true;
       var oldNum = 'noPrint';
@@ -923,7 +866,6 @@ const Documents = ({navigation, ...props}) => {
           result.annotations[e]['opacity'] = 0;
           console.log('resut ::', result);
           //   const deepClone = JSON.parse(JSON.stringify(result.annotations[e]));
-          //  console.log('remove ann is ' + JSON.stringify(deepClone));
           docViewerRef.current
             .removeAnnotation(result.annotations[e])
             .then(result => {
@@ -964,7 +906,6 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const Buttons = ({item}) => {
-    //   console.log('item', item);
     return (
       <View
         key={item?.value?.Id}
@@ -1061,9 +1002,6 @@ const Documents = ({navigation, ...props}) => {
   };
 
   const FilesView = ({item}) => {
-    // console.log("checking download item",item);
-    // console.log("is downlaod? ::",item?.download);
-    // console.log("instant json22222 ::", item.Instant_Json__c);
     const data = {
       image: require('../../../assets/thumbnailDemo2.jpg'),
     };
@@ -1164,21 +1102,17 @@ const Documents = ({navigation, ...props}) => {
 
   const handleBackPdf = () => {
     let index = fileData?.findIndex(x => x.Id == currentFile?.Id);
-    console.log('indexBack', index);
     if (index !== -1 && index > 0) {
       let extension = '';
       let i = index;
       let pdfFOrward;
       while (extension !== 'pdf') {
-        console.log('yyyyy', i--);
-        console.log('filesdata ::: ', fileData);
         pdfFOrward = fileData[i--];
 
         extension = pdfFOrward?.File_Type__c;
         i--;
       }
       setCurrentFile();
-      console.log('pdfFOrwardBack', pdfFOrward);
       setCurrentFile(pdfFOrward);
       handleView(pdfFOrward);
     }
@@ -1186,23 +1120,17 @@ const Documents = ({navigation, ...props}) => {
 
   const handleFrontPdf = () => {
     let index = fileData?.findIndex(x => x.Id == currentFile?.Id);
-    console.log('indexFront', index);
 
     if (index !== -1 && fileData?.length > index + 1) {
       let extension = '';
       let i = index;
       let pdfFOrward;
       while (extension !== 'pdf') {
-        //   console.log(' i1 is ' + i);
-        console.log('i>>>>>>>>>>', i++);
-        //  console.log(' i2 is ' + i);
-        //   console.log("filesdata ::: ", fileData);
         pdfFOrward = fileData[i++];
         extension = pdfFOrward?.File_Type__c;
         i++;
       }
       setCurrentFile();
-      console.log('pdfFOrwardFront', pdfFOrward);
       setCurrentFile(pdfFOrward);
       handleView(pdfFOrward);
     }
@@ -1349,7 +1277,6 @@ const Documents = ({navigation, ...props}) => {
                   onNavigationButtonClicked={handleClosePdf}
                   onCloseButtonPressed={handleClosePdf}
                   onStateChanged={event => {
-                    console.log(' count is ' + event?.pageCount);
                     pageCount = event?.pageCount;
                   }}
                 />
