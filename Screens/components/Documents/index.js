@@ -237,41 +237,6 @@ const Documents = ({navigation, ...props}) => {
   }, [netInfo.type, netInfo.isInternetReachable]);
   var PSPDFKit = NativeModules.PSPDFKit;
 
-  const get = async (data = null) => {
-    RNFS.readDir(RNFS.DocumentDirectoryPath)
-      .then(async result => {
-        let datafromstorage = result?.filter(val => val.name.includes('.pdf'));
-        let item = [];
-        try {
-          if (data) {
-            item = data;
-          } else {
-            const value = await AsyncStorage.getItem('FolderInfo');
-            item = fileData; //JSON.parse(value);
-          }
-          const updatedData = item?.map((val, index) => {
-            const filedatas = datafromstorage?.find(data =>
-              data?.name.includes(val?.Id),
-            );
-
-            if (filedatas) {
-              val['download'] = true;
-            } else {
-              val['download'] = false;
-            }
-            return val;
-          });
-
-          setFileData(updatedData);
-        } catch (err) {
-          console.log(err);
-        }
-      })
-      .catch(err => {
-        console.log(err.message, err.code);
-      });
-  };
-
   useEffect(() => {
     setTimeout(() => {
       if (fileToLoad) {
@@ -346,7 +311,7 @@ const Documents = ({navigation, ...props}) => {
       const documentNew =
         Platform.OS === 'ios'
           ? `${RNFS.DocumentDirectoryPath}/${val?.File_Name__c}`
-          : `file://${RNFS.DocumentDirectoryPath}/${val?.File_Name__c}.pdf`;
+          : `file://${RNFS.DocumentDirectoryPath}/${val.Id}_@_${val?.File_Name__c}.pdf`;
       setFileToLoad(documentNew);
       // PSPDFKit.present(documentNew, {
       //   showThumbnailBar: 'scrollable',
@@ -391,7 +356,7 @@ const Documents = ({navigation, ...props}) => {
     setLoaderForDownload(true);
     RNFS.downloadFile({
       fromUrl: val?.url,
-      toFile: `${RNFS.DocumentDirectoryPath}/${val.File_Name__c}.pdf`,
+      toFile: `${RNFS.DocumentDirectoryPath}/${val.Id}_@_${val.File_Name__c}.pdf`,
     })
       .promise.then(r => {
         const updatedData = fileData?.map((valu, index) => {
@@ -403,7 +368,9 @@ const Documents = ({navigation, ...props}) => {
         setLoaderForDownload(false);
         setFileData(updatedData);
       })
-      .catch(err => {});
+      .catch(err => {
+        setLoaderForDownload(false);
+      });
   };
 
   const handleDownloadFolder = (val, folder_name) => {
@@ -475,7 +442,7 @@ const Documents = ({navigation, ...props}) => {
 
             const updatedData = item?.map((val, index) => {
               const filedata = datafromstorage?.find(data =>
-                data?.name.includes(val?.Name),
+                data?.name.includes(val?.Id),
               );
 
               if (filedata) {
@@ -506,7 +473,7 @@ const Documents = ({navigation, ...props}) => {
 
             let updated_data = await res?.data?.tree?.map(async items => {
               const filedatas = datafromstorage?.find(data =>
-                data?.name.includes(items?.Name),
+                data?.name.includes(items?.Id),
               );
 
               if (filedatas) {
@@ -590,12 +557,10 @@ const Documents = ({navigation, ...props}) => {
             let datafromstorage = result?.filter(val =>
               val.name.includes('.pdf'),
             );
-
             let updated_data = await res?.data?.tree?.map(async items => {
               const filedatas = datafromstorage?.find(data =>
                 data?.name.includes(items?.Id),
               );
-
               if (filedatas) {
                 items['download'] = true;
               } else {
@@ -1143,7 +1108,7 @@ const Documents = ({navigation, ...props}) => {
     setBreadCrumList(data);
     handleFolderClick(item[0], 'handleBreadCrumb');
   };
-
+  console.log('fileData', fileData);
   return (
     <>
       {loading ? (
@@ -1185,7 +1150,12 @@ const Documents = ({navigation, ...props}) => {
                 <View>
                   <View>
                     {selectedfolder ? <SelectedFolder /> : ''}
-                    <Text style={{textAlign: 'center', marginBottom: 10}}>
+                    <Text
+                      style={{
+                        textAlign: 'center',
+                        marginTop: 15,
+                        marginBottom: 10,
+                      }}>
                       Folders
                     </Text>
                     {/* {previous?.length > 1 && (
@@ -1194,7 +1164,7 @@ const Documents = ({navigation, ...props}) => {
                       </Text>
                     )} */}
                     <View style={styles.mainBx}>
-                      {fileData?.length < 0 ? (
+                      {fileData?.length == 0 ? (
                         <ActivityIndicator />
                       ) : (
                         <FlatList
@@ -1224,7 +1194,7 @@ const Documents = ({navigation, ...props}) => {
                       Documents
                     </Text>
 
-                    {fileData?.length < 0 ? (
+                    {fileData?.length == 0 ? (
                       <ActivityIndicator />
                     ) : (
                       <FlatList
@@ -1342,7 +1312,7 @@ export const styles = StyleSheet.create({
     flexDirection: 'row',
     padding: 15,
     flexWrap: 'wrap',
-    textAlign: 'left',
+    justifyContent: 'center',
   },
   scrollView: {},
   buttonDown: {
