@@ -881,7 +881,11 @@ const Documents = ({navigation, ...props}) => {
           marginRight: 'auto',
         }}>
         <Button
-          title={item?.value?.Name}
+          title={
+            item?.value?.Name == 'Plan'
+              ? `${item?.value?.Name}` + 's'
+              : item?.value?.Name
+          }
           onPress={() => {
             setCurrentParentFolder(item);
             handleParentFolder(item);
@@ -1124,16 +1128,17 @@ const Documents = ({navigation, ...props}) => {
                   setSelectedProjectId={setSelectedProjectId}
                 />
                 <View style={styles.breadcrumbParent}>
-                  {breadCrumList?.map((val, index) => {
-                    return (
-                      <Text
-                        onPress={() => handleBreadCrumb(val?.Id)}
-                        style={styles.breadcrumb}>
-                        {val?.Name}
-                        {breadCrumList?.length <= index + 1 ? '' : ' > '}
-                      </Text>
-                    );
-                  })}
+                  {breadCrumList?.length > 1 &&
+                    breadCrumList?.map((val, index) => {
+                      return (
+                        <Text
+                          onPress={() => handleBreadCrumb(val?.Id)}
+                          style={styles.breadcrumb}>
+                          {val?.Name == 'Plan' ? 'Plans' : val?.Name}
+                          {breadCrumList?.length <= index + 1 ? '' : ' > '}
+                        </Text>
+                      );
+                    })}
                 </View>
                 <View>
                   <FlatList
