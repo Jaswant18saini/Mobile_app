@@ -24,6 +24,7 @@ import {ScrollView} from 'react-native';
 import _, {wrap} from 'lodash';
 import PSPDFKitView from 'react-native-pspdfkit';
 import {cloneDeep} from 'lodash';
+import PdfThumbnail from 'react-native-pdf-thumbnail';
 import {horizontalScale, moderateScale, verticalScale} from '../../Metrics';
 import DeviceInfo from 'react-native-device-info';
 import {ShowThumbnail} from '../../common/ShowThumbnail';
@@ -55,6 +56,9 @@ const Documents = ({navigation, ...props}) => {
   const [markupAccess, setMarkupAccess] = useState(false);
   const [annotations, setAnnotations] = useState({});
   const [currentParentFolder, setCurrentParentFolder] = useState();
+
+  const url =
+    'https://horsepower-qa.s3.amazonaws.com//767676/Project%20Files/Single%20Page%20Document%20%282%29%20%281%29.pdf?AWSAccessKeyId=AKIA6FO5IYHIP3YTEGBM&Expires=1672946922&Signature=Bu8el1%2FVnaefpQX92%2Bc6dyqxN8A%3D';
 
   const docViewerRef = React.createRef(null);
   var pageCount = 0;
@@ -424,6 +428,51 @@ const Documents = ({navigation, ...props}) => {
       .catch(err => {});
   };
 
+  const ThumbnailCreate = async item => {
+    const localFile = `${RNFS.DocumentDirectoryPath}/${item.File_Name__c}_thumb`;
+    let data = [];
+    try {
+      const myArray = await AsyncStorage.getItem('imageArray');
+      if (myArray !== null) {
+        // We have data!!
+        data = JSON.parse(myArray);
+      }
+    } catch (error) {
+      // Error retrieving data
+    }
+    const options = {
+      fromUrl: item.url,
+      toFile: localFile,
+    };
+
+    // last step it will download open it with fileviewer.
+    RNFS.downloadFile(options)
+      .promise.then(() => {
+        setTimeout(() => {
+          PdfThumbnail.generate(
+            `file://${RNFS.DocumentDirectoryPath}/${item?.File_Name__c}_thumb`,
+            // 'file://' + RNFS.DocumentDirectoryPath + item?.File_Name__c,
+            0,
+          ).then(res => {
+            console.log('PDF URI>>>', res.uri);
+            try {
+              AsyncStorage.setItem(
+                'imageArray',
+                JSON.stringify([...data, {id: item?.Id, image: res?.uri}]),
+              );
+            } catch (error) {
+              // Error saving data
+            }
+            item['image'] = res?.uri;
+          });
+        }, 2000);
+      })
+
+      .catch(error => {
+        console.log('error', error);
+      });
+  };
+
   const handleParentFolder = async item => {
     let filteredData = breadCrumList?.filter(val => val.Id == item?.value?.Id);
     if (filteredData?.length == 0) {
@@ -509,6 +558,26 @@ const Documents = ({navigation, ...props}) => {
                 data?.name.includes(items?.Name),
               );
 
+              if (items?.File_Type__c === 'pdf') {
+                try {
+                  const myArray = await AsyncStorage.getItem('imageArray');
+                  if (myArray !== null) {
+                    // We have data!!
+                    if (_.find(myArray, {id: items?.Id})?.image) {
+                      items['image'] = _.find(myArray, {
+                        id: items?.Id,
+                      })?.image;
+                    } else {
+                      ThumbnailCreate(items);
+                    }
+                  } else {
+                    ThumbnailCreate(items);
+                  }
+                } catch (error) {
+                  // Error retrieving data
+                }
+              }
+
               if (filedatas) {
                 items['download'] = true;
               } else {
@@ -531,7 +600,7 @@ const Documents = ({navigation, ...props}) => {
         .catch(err => {});
     }
   };
-
+  console.log('fileDataXOXOXOXOX', fileData);
   const handleFolderClick = async (item, section = '') => {
     if (section == '') {
       let filteredData = breadCrumList?.filter(
@@ -1019,7 +1088,25 @@ const Documents = ({navigation, ...props}) => {
             }
             onPress={() => handleView(item)}>
             {/* <ShowThumbnail item={item} /> */}
+
             <Image
+              source={{
+                uri: item?.image ? item?.image : 'Raka',
+                cache: 'only-if-cached',
+              }}
+              style={{
+                width: '100%',
+                height: 150,
+                marginLeft: 'auto',
+                marginRight: 'auto',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                flex: 1,
+                justifyContent: 'center',
+              }}
+            />
+
+            {/* <Image
               source={data?.image}
               style={[
                 {
@@ -1033,7 +1120,7 @@ const Documents = ({navigation, ...props}) => {
                   justifyContent: 'center',
                 },
               ]}
-            />
+            /> */}
           </TouchableHighlight>
           {currentFile.Id === item?.Id && loader && (
             <ActivityIndicator hidesWhenStopped={true} />
