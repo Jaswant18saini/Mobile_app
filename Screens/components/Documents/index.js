@@ -1056,9 +1056,9 @@ const Documents = ({navigation, ...props}) => {
               !item?.download
             }
             onPress={() => handleView(item)}>
-            {/* <ShowThumbnail item={item} /> */}
+            <ShowThumbnail item={item} />
 
-            <Image
+            {/* <Image
               source={{
                 uri: item?.image ? item?.image : 'Raka',
                 cache: 'only-if-cached',
@@ -1073,7 +1073,7 @@ const Documents = ({navigation, ...props}) => {
                 flex: 1,
                 justifyContent: 'center',
               }}
-            />
+            /> */}
 
             {/* <Image
               source={data?.image}
