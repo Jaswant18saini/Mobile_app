@@ -4,7 +4,6 @@ import {SafeAreaProvider} from 'react-native-safe-area-context';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {useNetInfo} from '@react-native-community/netinfo';
-// import Home from './Screens/Home';
 import Issues from './Screens/components/Issue/Index';
 import Checklists from './Screens/components/CheckLists';
 import Sync from './Screens/components/Sync';
@@ -54,7 +53,6 @@ function App() {
             screenOptions={({route}) => ({
               tabBarIcon: ({focused, color, size}) => {
                 let iconName;
-
                 if (route.name === 'Documents') {
                   iconName = focused ? 'md-document' : 'md-document';
                 } else if (route.name === 'Issue') {
@@ -76,7 +74,6 @@ function App() {
                 } else if (route.name === 'Offline Files') {
                   iconName = focused ? 'log-in' : 'log-in-outline';
                 }
-
                 // You can return any component that you like here!
                 return <Ionicons name={iconName} size={size} color={color} />;
               },
@@ -84,7 +81,11 @@ function App() {
               tabBarInactiveTintColor: 'gray',
             })}>
             {/* <Tab.Screen name="Home" component={Home} /> */}
-            <Tab.Screen name="Documents" component={Documents} />
+            <Tab.Screen
+              name="Documents"
+              component={Documents}
+              options={{headerShown: false}}
+            />
             <Tab.Screen name="Issue" component={Issues} />
             <Tab.Screen name="Checklists" component={Checklists} />
             <Tab.Screen name="Sync" component={Sync} />
