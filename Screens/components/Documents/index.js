@@ -567,7 +567,7 @@ const Documents = ({navigation, ...props}) => {
         .catch(err => {});
     }
   };
-  console.log('fileDataXOXOXOXOX', fileData);
+
   const handleFolderClick = async (item, section = '') => {
     if (section == '') {
       let filteredData = breadCrumList?.filter(
