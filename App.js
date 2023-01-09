@@ -13,6 +13,7 @@ import Documents from './Screens/components/Documents';
 import {Text, View, Linking, ActivityIndicator} from 'react-native';
 import Login from './Screens/components/Login';
 import Offline from './Screens/components/Offline';
+import ProjectForms from './Screens/components/ProjectForms';
 
 function App() {
   const Tab = createBottomTabNavigator();
@@ -65,6 +66,8 @@ function App() {
                     : 'md-sync-circle-sharp';
                 } else if (route.name === 'Daily-logs') {
                   iconName = focused ? 'md-partly-sunny' : 'md-partly-sunny';
+                } else if (route.name === 'Project Forms') {
+                  iconName = focused ? 'list' : 'list';
                 } else if (route.name === 'More') {
                   iconName = focused
                     ? 'md-ellipsis-horizontal-circle-sharp'
@@ -88,6 +91,7 @@ function App() {
             />
             <Tab.Screen name="Issue" component={Issues} />
             <Tab.Screen name="Checklists" component={Checklists} />
+            <Tab.Screen name="Project Forms" component={ProjectForms} />
             <Tab.Screen name="Sync" component={Sync} />
             <Tab.Screen name="Daily-logs" component={DialyLogs} />
             <Tab.Screen name="More" component={More} />
